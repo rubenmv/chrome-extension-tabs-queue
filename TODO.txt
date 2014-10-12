@@ -1,5 +1,11 @@
-- Cuando se lanzan notificaciones, cerrar la actual para mostrar la nueva. La extension de Downloads notifier o como se llame lo hace.
-- Cuando se abre un tab tipo la descarga de foto de facebook que se abre y se cierra, ese tab no tiene url al crearse?, puede que sea javascript lo que ejecuta y por eso no se ve nada. Hay que buscar una manera de tratar con estas tabs.
-- Cuando un link tiene target="_blank" o algo asi el tab se crea primero con url vacia y no se agrega a la cola. Se podría agregra un listener para cuando cambie una url y sea el tab con el id de ese nuevo creado. El problema es cuando se abre un nuevo tab vacio con ctrl+t, nunca cambia la url, pero estas tabs podría estar fuera de la cola.
 - Los tabs pinned deben ser tratados fuera de la cola.
+- Agregar al wait solo las que se abren vacias, el resto encolar directamente si no caben.
 - Feedback visual al agregar a la cola
+	- Animacion
+- Cuando se va a comprobar un tab actualizado, se recorren todos los tabs y se comprueba en la whitelist mediante regex para no contar los excluidos. Intentar reducir esto a algo mas simple, menos bucles y .test.
+- Agregar opciones de añadir nuevos dominios al whitelist
+	- Poder agregar dominios a whitelist con boton derecho
+- Guardar listas y opciones en storage
+- Enable/Disable desde el boton
+
+- Los tabs tipo descarga de foto en facebook se abren en blanco, se ponen a la espera pero se cierran sin pasar por onUpdated.
