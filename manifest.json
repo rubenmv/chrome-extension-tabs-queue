@@ -1,0 +1,27 @@
+{
+    "manifest_version": 2,
+
+    "name": "Tabs Queue",
+	"short_name": "Tabs Queue",
+    "description": "Queue to manage the maximum opened tabs.",
+    "version": "0.1",
+
+    "permissions": ["tabs", "notifications", "storage"],
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    
+    "browser_action": {
+        "default_icon": {
+            "38": "images/default-32.png",
+            "19": "images/default-20.png"
+        }
+    },
+    "icons": {
+        "128": "images/default-128.png",
+        "48": "images/default-48.png",
+        "24": "images/default-24.png"
+    },
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "options_page": "options.html"
+}

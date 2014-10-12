@@ -1,0 +1,5 @@
+- Cuando se lanzan notificaciones, cerrar la actual para mostrar la nueva. La extension de Downloads notifier o como se llame lo hace.
+- Cuando se abre un tab tipo la descarga de foto de facebook que se abre y se cierra, ese tab no tiene url al crearse?, puede que sea javascript lo que ejecuta y por eso no se ve nada. Hay que buscar una manera de tratar con estas tabs.
+- Cuando un link tiene target="_blank" o algo asi el tab se crea primero con url vacia y no se agrega a la cola. Se podría agregra un listener para cuando cambie una url y sea el tab con el id de ese nuevo creado. El problema es cuando se abre un nuevo tab vacio con ctrl+t, nunca cambia la url, pero estas tabs podría estar fuera de la cola.
+- Los tabs pinned deben ser tratados fuera de la cola.
+- Feedback visual al agregar a la cola
