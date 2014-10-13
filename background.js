@@ -67,30 +67,6 @@ function onSettingsChanged(changes, namespace) {
 		});
 	}
 }
-// Simply save the new tab id and check later when url gets updated
-// this fixes the problem with blank url when opening a link with target="_blank"
-function onCreatedTab(newTab) {
-	tabsWaitingArray.push(newTab.id);
-}
-
-function findTabWaiting(tabId) {
-	for (var i = 0; i < tabsWaitingArray.length; i++) {
-		if (tabId === tabsWaitingArray[i]) {
-			tabsWaitingArray.splice(i, 1);
-			return true;
-		}
-	}
-	return false;
-}
-
-function isInWhitelist(string) {
-	for (var i = 0; i < whitelist.length; i++) {
-		if (whitelist[i].test(string)) {
-			return true;
-		}
-	}
-	return false;
-}
 
 function updateBadgeCounter() {
 	// Update badge count
@@ -101,20 +77,51 @@ function updateBadgeCounter() {
 		text: urlQueue.length.toString()
 	});
 }
+// Check if tab is on the wait list (new) and remove it
+function findRemoveTabWaiting(tabId) {
+	for (var i = 0; i < tabsWaitingArray.length; i++) {
+		if (tabId === tabsWaitingArray[i]) {
+			tabsWaitingArray.splice(i, 1);
+			return true;
+		}
+	}
+	return false;
+}
+// Check if the url matches something in whitelist
+function isInWhitelist(string) {
+	for (var i = 0; i < whitelist.length; i++) {
+		if (whitelist[i].test(string)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// Simply save the new tab id and check later when url gets updated
+// this fixes the problem with blank url when opening a link with target="_blank"
+function onCreatedTab(newTab) {
+	tabsWaitingArray.push(newTab.id);
+
+}
 // New tab created, check limit and add to queue
 function onUpdatedTab(tabId, tabInfo) {
-	//First check if the updated tab is one of the new ones
-	if (!findTabWaiting(tabId)) {
+	//If a tab was pinned we treat it as removed
+	if (tabInfo.pinned) {
+		onRemovedTab();
+		return;
+	}
+	//If the tab
+	if (!findRemoveTabWaiting(tabId)) {
 		return;
 	}
 	// Get tabs in current window
 	chrome.tabs.query({
 		windowId: chrome.windows.WINDOW_ID_CURRENT
 	}, function (windowTabs) {
-		// Get number of opened tabs, whitelisted excluded
+		// Get number of opened tabs, whitelisted and pinned excluded
 		var tabCount = 0;
 		for (var i = 0; i < windowTabs.length; i++) {
-			if (!isInWhitelist(windowTabs[i].url)) {
+			if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
 				tabCount++;
 			}
 		}
@@ -133,20 +140,26 @@ function onUpdatedTab(tabId, tabInfo) {
 		}
 	});
 }
+
 // Tab removed, check if there's something in the queue
 function onRemovedTab() {
-	if (urlQueue.length > 0) {
-		if (!isQueuing) {
-			chrome.tabs.create({
-				url: urlQueue.shift(),
-				active: false
-			}, function () {
-				updateBadgeCounter();
-			});
+	// Check how many tabs can we create
+	chrome.tabs.query({
+		windowId: chrome.windows.WINDOW_ID_CURRENT
+	}, function (windowTabs) {
+		// Free space and items waiting
+		if (urlQueue.length > 0) {
+			if (!isQueuing) {
+				console.log('creating tabs');
+				chrome.tabs.create({
+					url: urlQueue.shift(),
+					active: false
+				}, updateBadgeCounter);
+			}
+			// Reset for the next one
+			isQueuing = false;
 		}
-		// Reset for the next one
-		isQueuing = false;
-	}
+	});
 }
 // LISTENERS
 // "OnLoad" listener to set the default options
