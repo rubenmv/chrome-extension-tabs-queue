@@ -1,15 +1,11 @@
 - Opciones:
 	-- "per domain", se limitan los tabs pero por dominio, es decir, facebook puede tener x tabs abiertos, piratebay otros x, el resto se encola. Al cerrar uno se comprueba la cola si hay mas de ese dominio y se abre en caso positivo. 
 	-- "manual" (encolar manualmente con ctrl+shift), para esto ultimo probablemente necesite los permisos de pagina para recoger el teclado en el momento en que se pincha un enlace, no se si se podrá hacer.
-
-- Los tabs pinned deben ser tratados fuera de la cola.
-- Agregar al wait solo las que se abren vacias, el resto encolar directamente si no caben.
-- Feedback visual al agregar a la cola
-	-- Animacion
+- Animacion visual al agregar a la cola
 - Cuando se va a comprobar un tab actualizado, se recorren todos los tabs y se comprueba en la whitelist mediante regex para no contar los excluidos. Intentar reducir esto a algo mas simple, menos bucles y .test.
-- Agregar opciones de añadir nuevos dominios al whitelist
-	-- Poder agregar dominios a whitelist con boton derecho
-- Enable/Disable desde el boton
+- Enable/Disable desde el boton. Al hacer disable que libere toda la cola, abriendo pestañas para todo lo que haya.
 
 - Los tabs tipo descarga de foto en facebook se abren en blanco, se ponen a la espera pero se cierran sin pasar por onUpdated.
+- Agregar opciones de añadir nuevos dominios al whitelist
+	-- Poder agregar dominios a whitelist con boton derecho
 

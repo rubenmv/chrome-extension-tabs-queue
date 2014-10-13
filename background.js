@@ -105,12 +105,14 @@ function onCreatedTab(newTab) {
 }
 // New tab created, check limit and add to queue
 function onUpdatedTab(tabId, tabInfo) {
-	//If a tab was pinned we treat it as removed
-	if (tabInfo.pinned) {
+	//Pinned tab = removed tab
+	if(tabInfo.pinned) {
 		onRemovedTab();
 		return;
 	}
-	//If the tab
+	//First check if the updated tab is one of the new ones
+	//or if it's pinned
+	
 	if (!findRemoveTabWaiting(tabId)) {
 		return;
 	}
@@ -147,18 +149,30 @@ function onRemovedTab() {
 	chrome.tabs.query({
 		windowId: chrome.windows.WINDOW_ID_CURRENT
 	}, function (windowTabs) {
+		// Get number of opened tabs, whitelisted and pinned excluded
+		var tabCount = 0;
+		for (var i = 0; i < windowTabs.length; i++) {
+			if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
+				tabCount++;
+			}
+		}
+		tabCount = tabLimit - tabCount;
 		// Free space and items waiting
-		if (urlQueue.length > 0) {
+		if (tabCount > 0 && urlQueue.length > 0) {
+			console.log('queuing: ', isQueuing);
 			if (!isQueuing) {
 				console.log('creating tabs');
-				chrome.tabs.create({
-					url: urlQueue.shift(),
-					active: false
-				}, updateBadgeCounter);
+				//Create as many tabs as possible with the URLs in queue
+				for (i = 0; i < tabCount && i < urlQueue.length; i++) {
+					chrome.tabs.create({
+						url: urlQueue.shift(),
+						active: false
+					}, updateBadgeCounter);
+				}
 			}
-			// Reset for the next one
-			isQueuing = false;
 		}
+		// Reset for the next one
+		isQueuing = false;
 	});
 }
 // LISTENERS
