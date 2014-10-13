@@ -1,104 +1,110 @@
 * {
-    font-family: Arial, sans-serif;
-    font-size: 10pt;
-    line-height: 1.5em;
-    color: #303942;
+	font-family: Arial, sans-serif;
+	font-size: 10pt;
+	line-height: 1.5em;
+	color: #303942;
 }
 body {
-    margin: 0;
-    background-color: #fff;
+	margin: 0;
+	background-color: #fff;
 }
 #wrapper-main {
-    margin: 30px auto 0 auto;
-    min-width: 576px;
-    max-width: 1080px;
+	margin: 30px auto 0 auto;
+	min-width: 576px;
+	max-width: 1080px;
 }
 header {
-    text-align: center;
-    padding: 1em 0;
-    box-shadow: 0 0 1em #bbb;
-    background-color: #efefef;
+	text-align: center;
+	padding: 1em 0;
+	box-shadow: 0 0 1em #bbb;
+	background-color: #efefef;
 }
-h1, h2 {
-    text-transform: uppercase;
+h1,
+h2 {
+	text-transform: uppercase;
 }
 h1 {
-    vertical-align: middle;
-    font-size: 20pt;
-    margin: 0;
+	vertical-align: middle;
+	font-size: 20pt;
+	margin: 0;
 }
-h1, img {
-    display: inline-block;
-    vertical-align: middle;
+h1,
+img {
+	display: inline-block;
+	vertical-align: middle;
 }
 h2 {
-    color: #666;
-    font-size: 1.2em;
-    margin-top: 1em;
-    border-bottom: 1px solid #cfcfcf;
+	color: #666;
+	font-size: 1.2em;
+	margin-top: 1em;
+	border-bottom: 1px solid #cfcfcf;
 }
-input[type="text"] {
-    padding: 0 0.5em;
-    min-width: 300px;
+input[type="number"] {
+	padding: 0 0 0 0.5em;
+	width: 80px;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	opacity: 1;
 }
 label {
-    font-weight: bold;
+	font-weight: bold;
 }
 p {
-    margin: 0;
+	margin: 0;
 }
 p + p {
-    margin-top: 1em;
+	margin-top: 1em;
 }
 footer {
-    margin: 2em 0;
+	margin: 2em 0;
 }
 #iconFileSelectors {
-    display: inline-block;
+	display: inline-block;
 }
 #notificationOptions {
-    display: none;
+	display: none;
 }
 #windowMode {
-    display: inline-block;
-    margin-left: 2em;
+	display: inline-block;
+	margin-left: 2em;
 }
 img#iconImage {
-    background: #eee url(images/checkerboard.png) repeat;
-    margin: 0 1em;
-    padding: 1em;
-    border: 3px solid #ccc;
-    max-width: 64px;
-    max-height: 64px;
+	background: #eee url(images/checkerboard.png) repeat;
+	margin: 0 1em;
+	padding: 1em;
+	border: 3px solid #ccc;
+	max-width: 64px;
+	max-height: 64px;
 }
 label.label2 {
-    font-weight: normal;
+	font-weight: normal;
 }
 .section {
-    width: 960px;
-    box-shadow: inset 0 0 1em #ddd;
-    margin: 0.5em 0;
-    margin-bottom: 1em;
-    padding: 0.5em 2em;
-    border-radius: 10px;
-    border: 1px solid #ddd;
+	width: 960px;
+	box-shadow: inset 0 0 1em #ddd;
+	margin: 0.5em 0;
+	margin-bottom: 1em;
+	padding: 0.5em 2em;
+	border-radius: 10px;
+	border: 1px solid #ddd;
 }
 .section * {
-    vertical-align: middle;
+	vertical-align: middle;
 }
 .controls {
-    display: inline-block;
-    width: 60%;
+	display: inline-block;
+	width: 60%;
 }
 .help {
-    display: inline-block;
-    width: 35%;
-    border-left: 1px solid #CCC;
-    padding-left: 10px;
+	display: inline-block;
+	width: 35%;
+	border-left: 1px solid #CCC;
+	padding-left: 10px;
 }
 .warning {
-    color: #FF8000;
+	color: #FF8000;
 }
 .alert {
-    color: #cc0101;
+	color: #cc0101;
 }

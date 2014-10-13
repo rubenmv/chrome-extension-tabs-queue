@@ -5,7 +5,6 @@
 - Cuando se va a comprobar un tab actualizado, se recorren todos los tabs y se comprueba en la whitelist mediante regex para no contar los excluidos. Intentar reducir esto a algo mas simple, menos bucles y .test.
 - Agregar opciones de añadir nuevos dominios al whitelist
 	- Poder agregar dominios a whitelist con boton derecho
-- Guardar listas y opciones en storage
 - Enable/Disable desde el boton
 
 - Los tabs tipo descarga de foto en facebook se abren en blanco, se ponen a la espera pero se cierran sin pasar por onUpdated.

@@ -1,7 +1,7 @@
 /*global chrome, console, document*/
 var urlQueue = [],
 	tabsWaitingArray = [], // Tabs waiting for url update (before queuing)
-	tabLimit = 6,
+	tabLimit = 10,
 	// When a new tab is queued, it's instantly removed
 	// this flag alerts not to open a new tab when this happens
 	isQueuing = false,
@@ -18,6 +18,7 @@ function initOptions() {
 			return;
 		}
 		// Initialize
+		tabLimit = items.tabLimit;
 		//Get icon parts and join them
 		var iconString = '';
 		for (var i = 0; i < ICON_MAX_KEYS; i++) {
@@ -36,6 +37,7 @@ function initOptions() {
 	}
 	// Set defaults
 	var options = {};
+	options.tabLimit = 10;
 	//Generate the keys for the icon
 	for (var i = 0; i < ICON_MAX_KEYS; i++) {
 		//Clear the rest, in case the new icon is smaller
@@ -52,7 +54,9 @@ function onSettingsChanged(changes, namespace) {
 		if (changes.hasOwnProperty(key)) {
 			storageChange = changes[key];
 			newValue = storageChange.newValue;
-			if (key.match(/^icon[0-9]{1,2}$/) !== null) { //if is icon key, add
+			if (key === 'tabLimit') {
+				tabLimit = newValue;
+			} else if (key.match(/^icon[0-9]{1,2}$/) !== null) { //if is icon key, add
 				fullIcon += newValue;
 			}
 		}

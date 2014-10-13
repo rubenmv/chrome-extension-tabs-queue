@@ -1,7 +1,8 @@
 /*global chrome, FileReader, window, document, console*/
 (function () {
 	'use strict';
-	var FILE_TYPES = ['image/jpeg', 'image/png', 'image/x-icon'],
+	var TAB_LIMIT_DEFAULT = 10,
+		FILE_TYPES = ['image/jpeg', 'image/png', 'image/x-icon'],
 		FILE_SIZE_LIMIT = 102400, //Bytes, 100KB (1KB = 1024B)
 		IMAGE_DIM_LIMIT = 128, //px, square
 		// Icon is saved in base64, calculate storage limits and leave some bytes for the other items
@@ -52,9 +53,19 @@
 	function saveOptions() {
 		var i = 0;
 
-		var iconSource = document.getElementById('iconImage').src; //BASE64 or url
+		var tabLimit = document.getElementById('tabLimit').value,
+			iconSource = document.getElementById('iconImage').src; //BASE64 or url
+
+		if (tabLimit < 1) {
+			document.getElementById('statusTabLimit').textContent = 'Incorrect value, minimum of 1.';
+			window.setTimeout(function () {
+				document.getElementById('statusTabLimit').textContent = '';
+			}, 3000);
+			return;
+		}
 		// Set the options object
 		var options = {};
+		options.tabLimit = tabLimit;
 		//Generate the keys for the icon
 		//Icon keys cleanup
 		for (i = 0; i < ICON_MAX_KEYS; i++) {
@@ -94,6 +105,7 @@
 			Set defaults for localStorage get error
 				 ************* */
 		var options = {};
+		options.tabLimit = TAB_LIMIT_DEFAULT;
 		//icon cleanup
 		for (var i = 0; i < ICON_MAX_KEYS; i++) {
 			options['icon' + i] = '';
@@ -108,6 +120,9 @@
 				console.error("An error ocurred restoring options: " + chrome.runtime.lastError);
 				return;
 			}
+			//TAB LIMIT			
+			document.getElementById('tabLimit').value = items.tabLimit;
+			//ICON
 			var iconString = '';
 			//Get icon parts and join them
 			for (var i = 0; i < ICON_MAX_KEYS; i++) {

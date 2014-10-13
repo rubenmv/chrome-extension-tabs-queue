@@ -28,10 +28,6 @@ function getBackgroundInfo() {
 			liElement = document.createElement('li');
 			liElement.textContent = urlArray[i];
 			liElement.value = i; // To be able to remove it from the background page queue
-			//aElement = document.createElement('a');
-			//aElement.href = urlArray[i];
-			//aElement.textContent = urlArray[i];
-			//liElement.appendChild(aElement);
 			urlList.appendChild(liElement);
 
 			// Finally add listener to close popup and open link in active tab

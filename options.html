@@ -4,7 +4,6 @@
 <head>
 	<meta charset="UTF-8" />
 	<title>Tabs Queue settings</title>
-	<link rel="stylesheet" href="reset.css" />
 	<link rel="stylesheet" href="options.css" />
 </head>
 
@@ -14,8 +13,21 @@
 		<h1>Tabs Queue settings</h1>
 	</header>
 	<div id="wrapper-main">
-		<h2>ICON</h2>
+		<!--Tab limits-->
+		<h2>Tabs limit</h2>
+		<div class="section">
+			<div class="controls">
+				<input type="number" min="1" value="10" id="tabLimit" />
+				<span id="statusTabLimit" class="alert"></span>
+			</div>
+			<div class="help">
+				<span>Sets maximum of opened tabs. New tabs will be queued.</span>
+				<br>
+				<span class="warning">Chrome browser pages don't count for this limit. These are pages like chrome://newtab or chrome-extension://.</span>
+			</div>
+		</div>
 		<!--Icon-->
+		<h2>ICON</h2>
 		<div class="section">
 			<div class="controls">
 				<!--Base64 here (icons/default-32.png), makes it easy to load and save options later-->
@@ -29,7 +41,7 @@
 				</div>
 			</div>
 			<div class="help">
-				<span>Sets the icon on the button and notifications.</span>
+				<span>Sets the icon on the button.</span>
 				<br>
 				<span class="warning">JPG/PNG/ICO format and 19x19px is recommended or it will be resized and may not look good.<br>Maximum size of 100KB.</span>
 				<br />
