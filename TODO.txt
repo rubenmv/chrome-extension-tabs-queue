@@ -1,3 +1,4 @@
+- Abrir las pestañas solo en la window que le pertenezca, ahora mismo al cerrar una pestaña en una ventana distinta se abre la siguiente en cola. Esto puede ser complicado si se mueve una pestaña a una ventana nueva.
 - Opciones:
 	-- "per domain", se limitan los tabs pero por dominio, es decir, facebook puede tener x tabs abiertos, piratebay otros x, el resto se encola. Al cerrar uno se comprueba la cola si hay mas de ese dominio y se abre en caso positivo. 
 	-- "manual" (encolar manualmente con ctrl+shift), para esto ultimo probablemente necesite los permisos de pagina para recoger el teclado en el momento en que se pincha un enlace, no se si se podrá hacer.
@@ -8,4 +9,6 @@
 - Los tabs tipo descarga de foto en facebook se abren en blanco, se ponen a la espera pero se cierran sin pasar por onUpdated.
 - Agregar opciones de añadir nuevos dominios al whitelist
 	-- Poder agregar dominios a whitelist con boton derecho
+
+- Buscar otro nombre, que queue es un palabra complicada hasta para los anglosajones
 
