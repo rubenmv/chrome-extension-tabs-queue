@@ -167,23 +167,16 @@ function removeItem(index) {
 			newValues['item' + i] = urlQueue[i+1]; //current item = next item
 		}
 	}
-	console.log('NEW STORAGE VALUES');
-	for (key in newValues) {
-		console.log(key + ': ' + newValues[key]);
-	}
+
 	chrome.storage.local.set(newValues, function() {
 		// Remove last item, now is duplicated
 		var lastItem = 'item' + lastIndex;
 		chrome.storage.local.remove(lastItem);
-
-		// Remove from queue
-		urlQueue.splice(index, 1);
-		console.log('URLQUEUE AFTER SPLICE');
-		for (var i = 0; i < urlQueue.length; i++) {
-			console.log(urlQueue[i]);
-		}
-		updateBadgeCounter();
 	});
+
+	// Remove from queue
+	urlQueue.splice(index, 1);
+	updateBadgeCounter();
 }
 // Check if tab is on the wait list (new) and remove it
 function findRemoveTabWaiting(tabId) {
@@ -273,16 +266,22 @@ function onRemovedTab() {
 				tabCount++;
 			}
 		}
-		tabCount = tabLimit - tabCount;
+		var freeSpace = tabLimit - tabCount;
 		// Free space and items waiting
-		if (tabCount > 0 && urlQueue.length > 0) {
+		if (freeSpace > 0 && urlQueue.length > 0) {
 			if (!isQueuing) {
-				//Create as many tabs as possible with the URLs in queue
-				for (i = 0; i < tabCount && i < urlQueue.length; i++) {
+				// Create as many tabs as possible
+				// First create the tabs, then remove the items from queue
+				// after ALL new tabs have been created
+				for (i = 0; i < freeSpace && i < urlQueue.length; i++) {
 					chrome.tabs.create({
-						url: urlQueue[0],
+						url: urlQueue[i],
 						active: false
-					}, function() { removeItem(0); });
+					});
+				}
+				
+				for (i = 0; i < freeSpace && i < urlQueue.length; i++) {
+					removeItem(i);
 				}
 			}
 		}

@@ -4,6 +4,8 @@
 
 - Al abrir varias urls de la cola al mismo tiempo se abre la misma varias veces.
 
+- Si la ventana no es la activa no funciona si por ejemplo es un popup o la dev tools.
+
 - Controlar el tema de ventanas: hacerlo por ventana si se puede, pero entonces habría que quitar el local storage (tambien puede complicarlo el tema de mover tabs de una ventana a otra); o hacerlo en global pero mirar que bugs puede haber al cerrar una ventana estando otra abierta.
 
 - Cuando se va a comprobar un tab actualizado, se recorren todos los tabs y se comprueba en la whitelist mediante regex para no contar los excluidos. Intentar reducir esto a algo mas simple, menos bucles y .test.
