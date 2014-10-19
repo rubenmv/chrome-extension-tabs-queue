@@ -2,6 +2,10 @@
 
 var bgPage = chrome.extension.getBackgroundPage();
 
+/**
+ * Opens clicked item on current tab
+ * @param  {Object} event [Event received on click]
+ */
 function openItemInCurrentTab(event) {
 	'use strict';
 	event.preventDefault();
@@ -9,12 +13,15 @@ function openItemInCurrentTab(event) {
 	chrome.tabs.update({
 		url: liElement.textContent
 	});
-	// Remove element from queue
-	bgPage.urlQueue.splice(liElement.value, 1);
-	bgPage.updateBadgeCounter();
+	// Remove element from queue and storage
+	// value (int) was added on getBackgroundInfo() when creating li elements
+	bgPage.removeItem(liElement.value);
 	window.close();
 }
 
+/**
+ * Gets data from background page
+ */
 function getBackgroundInfo() {
 	'use strict';
 	var info = document.getElementById('url-list-info'),
@@ -37,4 +44,11 @@ function getBackgroundInfo() {
 		info.textContent = 'Queue is empty';
 	}
 }
+
+function clearAll() {
+	bgPage.clearItems();
+	window.close();
+}
+
 document.addEventListener('DOMContentLoaded', getBackgroundInfo);
+document.getElementById('button-clear').addEventListener('click', clearAll);
