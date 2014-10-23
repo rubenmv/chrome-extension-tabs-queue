@@ -1,69 +1,66 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-	<meta charset="UTF-8" />
-	<title>Tabs Queue settings</title>
-	<link rel="stylesheet" href="options.css" />
-</head>
-
-<body>
-	<header>
-		<img src="images/default-64.png" alt="Logo" />
-		<h1>Tabs Queue settings</h1>
-	</header>
-	<div id="wrapper-main">
-		<!--Tab limits-->
-		<h2>Tabs limit</h2>
-		<div class="section">
-			<div class="controls">
-				<input type="number" min="1" value="10" id="tabLimit" />
-				<span id="statusTabLimit" class="alert"></span>
-			</div>
-			<div class="help">
-				<span>Sets maximum of opened tabs. New tabs will be queued.</span>
-				<br>
-				<span class="warning">Pinned tabs and Chrome specific pages won't count for this limit, these are pages like chrome://newtab or chrome-extension://.</span>
-			</div>
-		</div>
-		<!--Icon-->
-		<h2>ICON</h2>
-		<div class="section">
-			<div class="controls">
-				<!--Base64 here (icons/default-32.png), makes it easy to load and save options later-->
-				<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC" alt="icon" id="iconImage" />
-				<div id="iconFileSelectors">
-					<label>Upload from hard drive</label>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Tabs Queue settings</title>
+		<link rel="stylesheet" href="options.css" />
+	</head>
+	<body>
+		<header>
+			<img src="images/default-64.png" alt="Logo" />
+			<h1>Tabs Queue settings</h1>
+		</header>
+		<div id="wrapper-main">
+			<!--Tab limits-->
+			<h2>Tabs limit</h2>
+			<div class="section">
+				<div class="controls">
+					<input type="number" min="1" value="10" id="tabLimit" />
+					<span id="statusTabLimit" class="alert"></span>
+				</div>
+				<div class="help">
+					<span>Sets maximum of opened tabs. New tabs will be queued.</span>
 					<br>
-					<input type="file" id="iconFilePicker" />
-					<br>
-					<span id="statusIcon" class="alert"></span>
+					<span class="warning">Pinned tabs and Chrome specific pages won't count for this limit, these are pages like chrome://newtab or chrome-extension://.</span>
 				</div>
 			</div>
-			<div class="help">
-				<span>Sets the icon on the button.</span>
-				<br>
-				<span class="warning">JPG/PNG/ICO format and 19x19px is recommended or it will be resized and may not look good.<br>Maximum size of 100KB.</span>
-				<br />
-				<button id="iconRestore">Restore default</button>
+			<!--Icon-->
+			<h2>ICON</h2>
+			<div class="section">
+				<div class="controls">
+					<!--Base64 here (icons/default-32.png), makes it easy to load and save options later-->
+					<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC" alt="icon" id="iconImage" />
+					<div id="iconFileSelectors">
+						<label>Upload from hard drive</label>
+						<br>
+						<input type="file" id="iconFilePicker" />
+						<br>
+						<span id="statusIcon" class="alert"></span>
+					</div>
+				</div>
+				<div class="help">
+					<span>Sets the icon on the button.</span>
+					<br>
+					<span class="warning">JPG/PNG/ICO format and 19x19px is recommended or it will be resized and may not look good.<br>Maximum size of 100KB.</span>
+					<br />
+					<button id="iconRestore">Restore default</button>
+				</div>
 			</div>
-		</div>
-		<button id="save">Save</button>
-		<span id="status" class="alert"></span>
-		<footer>
-			<h2>about the extension</h2>
-			<div>
-				<p>
+			<button id="save">Save</button>
+			<span id="status" class="alert"></span>
+			<footer>
+				<h2>about the extension</h2>
+				<div>
+					<p>
 					<b>Tabs Queue</b> by <a href="https://twitter.com/rub3nmv"><b>Rub&eacute;n Mart&iacute;nez</b></a> is licensed as <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GPLv3</a>. You can find the <a href="https://github.com/rubenmv/chrome-extension-tabs-queue">source code in GitHub</a>.
 					<br>For issues please refer to the GitHub repository.
-				</p>
-				<p>
+					</p>
+					<p>
 					Default icon made by <a href="http://www.picol.org/" title="Stephen Hutchings">Picol</a> is licensed under <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons BY SA 3.0">CC BY SA 3.0</a>
-				</p>
-			</div>
-		</footer>
-	</div>
-	<script src="options.js"></script>
-</body>
-
+					</p>
+				</div>
+			</footer>
+		</div>
+		<script src="options.js"></script>
+	</body>
 </html>

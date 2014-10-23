@@ -9,7 +9,6 @@ var urlQueue = [],
 	whitelist = [/^chrome[:|-].*/],
 	ICON_MAX_KEYS = 14,
 	ICON_DEFAULT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC';
-
 /**
  * Updates counter in browser action icon/button
  */
@@ -18,11 +17,9 @@ function updateBadgeCounter() {
 	if (urlQueue.length > 0) {
 		badgeColor = '#ff0000';
 	}
-
 	chrome.browserAction.setBadgeBackgroundColor({
 		color: badgeColor
 	});
-
 	chrome.browserAction.setBadgeText({
 		text: urlQueue.length.toString()
 	});
@@ -38,22 +35,21 @@ function initOptions() {
 			return;
 		}
 		// Initialize properties
-		if(items.hasOwnProperty('tabLimit')) {
+		if (items.hasOwnProperty('tabLimit')) {
 			tabLimit = items.tabLimit;
 		}
 		//Get icon parts and join them
 		var iconString = '';
-		if(items.hasOwnProperty('icon1')) {
+		if (items.hasOwnProperty('icon1')) {
 			// Retrieve icon data
 			for (var i = 0; i < ICON_MAX_KEYS; i++) {
-				if(items.hasOwnProperty('icon' + i)) {
+				if (items.hasOwnProperty('icon' + i)) {
 					iconString += items['icon' + i];
 				} else {
 					break; // No key found, icon is complete
 				}
 			}
-		}
-		else {
+		} else {
 			// Default icon
 			iconString = ICON_DEFAULT;
 		}
@@ -63,17 +59,15 @@ function initOptions() {
 	}
 	// local.get callback, queue state
 	function queueDataRetrieved(items) {
-		
 		// Fill queue
 		if (items.hasOwnProperty('queueLength')) {
 			for (var i = 0; i < items.queueLength; i++) {
-				urlQueue.push(items['item'+i]);
+				urlQueue.push(items['item' + i]);
 			}
 		}
 		// Badge counter
 		updateBadgeCounter();
 	}
-
 	// Get the options from sync storage
 	chrome.storage.sync.get(null, optionsDataRetrieved);
 	// Get queue state from local storage
@@ -99,7 +93,6 @@ function onSettingsChanged(changes, namespace) {
 		});
 	}
 }
-
 /**
  * Push new url to queue and save it in local storage
  * @param  {string} url [New url to queue]
@@ -110,22 +103,19 @@ function saveItem(url) {
 	// Add to storage
 	var itemIndex = urlQueue.length - 1,
 		values = {};
-
 	// Set new length
-	values['queueLength'] = urlQueue.length;
+	values.queueLength = urlQueue.length;
 	// Add new item
 	values['item' + itemIndex] = url;
-	chrome.storage.local.set(values, function () {
+	chrome.storage.local.set(values, function() {
 		// Check for error
 		if (chrome.runtime.lastError !== undefined) {
 			console.error("An error ocurred saving item: " + chrome.runtime.lastError.string);
 			console.error(chrome.runtime.lastError);
 		}
 	});
-
 	updateBadgeCounter();
 }
-
 /**
  * Removes item from queue and storage
  * @param  {int} index [Item's index in queue]
@@ -157,23 +147,20 @@ function removeItem(index) {
 		});		
 	});
 */
-	
 	// Not the last index, rearange queue
 	var lastIndex = urlQueue.length - 1;
 	var newValues = {};
-	newValues['queueLength'] = lastIndex;
-	if ( index <  lastIndex) {
+	newValues.queueLength = lastIndex;
+	if (index < lastIndex) {
 		for (var i = index; i < lastIndex; i++) {
-			newValues['item' + i] = urlQueue[i+1]; //current item = next item
+			newValues['item' + i] = urlQueue[i + 1]; //current item = next item
 		}
 	}
-
 	chrome.storage.local.set(newValues, function() {
 		// Remove last item, now is duplicated
 		var lastItem = 'item' + lastIndex;
 		chrome.storage.local.remove(lastItem);
 	});
-
 	// Remove from queue
 	urlQueue.splice(index, 1);
 	updateBadgeCounter();
@@ -197,7 +184,6 @@ function isInWhitelist(string) {
 	}
 	return false;
 }
-
 /**
  * Removes all items in queue
  */
@@ -206,30 +192,27 @@ function clearItems() {
 	chrome.storage.local.clear();
 	updateBadgeCounter();
 }
-
 // Simply save the new tab id and check later when url gets updated
 // this fixes the problem with blank url when opening a link with target="_blank"
 function onCreatedTab(newTab) {
 	tabsWaitingArray.push(newTab.id);
-
 }
 // New tab created, check limit and add to queue
 function onUpdatedTab(tabId, tabInfo) {
 	//Pinned tab = removed tab
-	if(tabInfo.pinned) {
+	if (tabInfo.pinned) {
 		onRemovedTab();
 		return;
 	}
 	//First check if the updated tab is one of the new ones
 	//or if it's pinned
-	
 	if (!findRemoveTabWaiting(tabId)) {
 		return;
 	}
 	// Get tabs in current window
 	chrome.tabs.query({
 		windowId: chrome.windows.WINDOW_ID_CURRENT
-	}, function (windowTabs) {
+	}, function(windowTabs) {
 		// Get number of opened tabs, whitelisted and pinned excluded
 		var tabCount = 0;
 		for (var i = 0; i < windowTabs.length; i++) {
@@ -252,13 +235,12 @@ function onUpdatedTab(tabId, tabInfo) {
 		}
 	});
 }
-
 // Tab removed, check if there's something in the queue
 function onRemovedTab() {
 	// Check how many tabs can we create
 	chrome.tabs.query({
 		windowId: chrome.windows.WINDOW_ID_CURRENT
-	}, function (windowTabs) {
+	}, function(windowTabs) {
 		// Get number of opened tabs, whitelisted and pinned excluded
 		var tabCount = 0;
 		for (var i = 0; i < windowTabs.length; i++) {
@@ -279,7 +261,6 @@ function onRemovedTab() {
 						active: false
 					});
 				}
-				
 				for (i = 0; i < freeSpace && i < urlQueue.length; i++) {
 					removeItem(i);
 				}
