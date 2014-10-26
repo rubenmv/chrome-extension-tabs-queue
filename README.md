@@ -6,6 +6,8 @@ The main purpose of this extension is to keep the browser free from a ton of bac
 
 By default tabs with URL matching Chrome internal pages won't be counted in the limit. For example chrome://extension or chrome://settings can be opened any time. This also means that you can open a new tab manually and then load any page from there, that tab won't be queued.
 
+IMPORTANT: This extension is not meant to be used as some kind of "read later", where you close the browser and come back later to check the links, although it keeps the queue when you exit, but this was thought to be used in a session.
+
 ![Button and popup screenshot](screenshots/tabs-queue-toolbar-button.png)
 ![Settings screenshot](screenshots/tabs-queue-settings.png)
 
