@@ -54,6 +54,7 @@
 		var i = 0;
 
 		var tabLimit = document.getElementById('tabLimit').value,
+			allowDuplicates = document.getElementById('duplicates').checked,
 			iconSource = document.getElementById('iconImage').src; //BASE64 or url
 
 		if (tabLimit < 1) {
@@ -66,6 +67,7 @@
 		// Set the options object
 		var options = {};
 		options.tabLimit = tabLimit;
+		options.allowDuplicates = allowDuplicates;
 		//Generate the keys for the icon
 		//Icon keys cleanup
 		for (i = 0; i < ICON_MAX_KEYS; i++) {
@@ -106,6 +108,7 @@
 				 ************* */
 		var options = {};
 		options.tabLimit = TAB_LIMIT_DEFAULT;
+		options.allowDuplicates = false;
 		//icon cleanup
 		for (var i = 0; i < ICON_MAX_KEYS; i++) {
 			options['icon' + i] = '';
@@ -120,8 +123,9 @@
 				console.error("An error ocurred restoring options: " + chrome.runtime.lastError);
 				return;
 			}
-			//TAB LIMIT			
+			//TAB LIMIT
 			document.getElementById('tabLimit').value = items.tabLimit;
+			document.getElementById('duplicates').checked = items.allowDuplicates;
 			//ICON
 			var iconString = '';
 			//Get icon parts and join them

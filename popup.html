@@ -1,22 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>Tabs Queue</title>
-		<link rel="stylesheet" href="popup.css" />
-	</head>
-	<body>
-		<h1>Tabs Queue</h1>
-		<div class="caption">
-			<div class="left">
-				<h2 id="url-list-info">Queue is empty</h2>
-			</div>
-			<div class="right">
-				<button id="button-clear">Clear all</button>
-			</div>
-		</div>
-		<ol id="url-list">
-		</ol>
-		<script src="popup.js"></script>
-	</body>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tabs Queue</title>
+  <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="onoff-switch.css" />
+</head>
+
+<body>
+  <h1>Tabs Queue</h1>
+  <div class="onoffswitch">
+    <input type="checkbox" id="myonoffswitch" name="onoffswitch" class="onoffswitch-checkbox" checked>
+    <label class="onoffswitch-label" for="myonoffswitch">
+      <span class="onoffswitch-inner"></span>
+      <span class="onoffswitch-switch"></span>
+    </label>
+  </div>
+  <div class="caption">
+    <div class="left">
+      <h2 id="url-list-info">Queue is empty</h2>
+    </div>
+    <!--<div class="right">
+      <button id="button-openall">Open all</button>
+    </div>
+    <div class="right">
+      <button id="button-queueall">Queue all except active</button>
+    </div>-->
+    <div class="right">
+      <button id="button-clear">Clear all</button>
+    </div>
+  </div>
+  <ol id="url-list">
+  </ol>
+  <script src="popup.js"></script>
+</body>
+
 </html>

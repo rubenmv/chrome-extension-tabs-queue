@@ -1,0 +1,4 @@
+1.1 - DATE
+- By default duplicated urls won't queue and will move the existing item to the top of the queue.
+- Option to allow duplicates.
+- Added feedback module to options page.

@@ -44,6 +44,8 @@ body {
 	text-align: center;
 }
 h1 {
+  display: inline-block;
+  vertical-align: middle;
 	font-size: 2em;
 	text-transform: uppercase;
 	font-weight: 700;

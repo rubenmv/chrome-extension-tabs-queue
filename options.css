@@ -47,6 +47,20 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
 	opacity: 1;
 }
+#email-form fieldset {
+  border: none;
+}
+#email-form label, #email-form input, #email-form button,  #email-form textarea {
+  display: block;
+  margin: 0.5em 0;
+}
+#email-form textarea {
+  width: 300px;
+  height: 100px;
+}
+#email-form input[type="email"], #email-form textarea {
+  padding: 0.2em 0.4em;
+}
 label {
 	font-weight: bold;
 }
@@ -80,12 +94,15 @@ img#iconImage {
 label.label2 {
 	font-weight: normal;
 }
+hr {
+	margin: 1em 0;
+}
 .section {
 	width: 960px;
 	box-shadow: inset 0 0 1em #ddd;
 	margin: 0.5em 0;
 	margin-bottom: 1em;
-	padding: 0.5em 2em;
+	padding: 1em 2em;
 	border-radius: 10px;
 	border: 1px solid #ddd;
 }
