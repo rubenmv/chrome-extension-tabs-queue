@@ -4,6 +4,11 @@ var tabsWaitingArray = []; // Tabs waiting for url update (before queuing)
 var tabLimit = 10;
 var allowDuplicates = false;
 var queues = []; // Array of Queue objects
+// Indicates the number of simultaneous tabs that need to be opened
+// so they will be opened one after another, not simultaneously
+var openingTabs = 0;
+// Interval when opening several tabs at the "same" time, this way they won't mess up with the queue
+var interval = 500; //ms
 
 // When a new tab is queued, it's instantly removed
 // this flag alerts not to open a new tab when this happens
@@ -77,7 +82,7 @@ function updateBadgeCounter() {
   chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
     var currentTab = tabs[0];
     // Other window types like popup or app
-    if(!currentTab) {
+    if (!currentTab) {
       return;
     }
     var badgeColor = '#00ff00';
@@ -363,46 +368,50 @@ function onRemovedTab() {
   if (!isActive) {
     return;
   }
-  
-  // Check how many tabs can we create
-  chrome.tabs.query({
-    windowId: chrome.windows.WINDOW_ID_CURRENT
-  }, function (windowTabs) {
-    // Windows like popups and other will also trigger
-    // if there are no tabs just cancel
-    if (windowTabs.length == 0) {
-      return;
-    }
-    var windowId = windowTabs[0].windowId;
-    var currentQueue = getQueue(windowId).items;
-    // Get number of opened tabs, whitelisted and pinned excluded
-    var tabCount = 0;
-    for (var i = 0; i < windowTabs.length; i++) {
-      if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
-        tabCount++;
+  openingTabs++;
+  setTimeout(function () {
+    // Check how many tabs can we create
+    chrome.tabs.query({
+      windowId: chrome.windows.WINDOW_ID_CURRENT
+    }, function (windowTabs) {
+      // Windows like popups and other will also trigger
+      // if there are no tabs just cancel
+      if (windowTabs.length == 0) {
+        return;
       }
-    }
-    var freeSpace = tabLimit - tabCount;
-    // Free space and items waiting
-    if (freeSpace > 0 && currentQueue.length > 0) {
-      if (!isQueuing) {
-        // Create as many tabs as possible
-        // First create the tabs, then remove the items from queue
-        // after ALL new tabs have been created
-        for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
-          chrome.tabs.create({
-            url: currentQueue[i].url,
-            active: false
-          });
-        }
-        for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
-          removeItem(i);
+      console.log("open tab" + (openingTabs * interval));
+      var windowId = windowTabs[0].windowId;
+      var currentQueue = getQueue(windowId).items;
+      // Get number of opened tabs, whitelisted and pinned excluded
+      var tabCount = 0;
+      for (var i = 0; i < windowTabs.length; i++) {
+        if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
+          tabCount++;
         }
       }
-    }
-    // Reset for the next one
-    isQueuing = false;
-  });
+      var freeSpace = tabLimit - tabCount;
+      // Free space and items waiting
+      if (freeSpace > 0 && currentQueue.length > 0) {
+        if (!isQueuing) {
+          // Create as many tabs as possible
+          // First create the tabs, then remove the items from queue
+          // after ALL new tabs have been created
+          for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
+            chrome.tabs.create({
+              url: currentQueue[i].url,
+              active: false
+            });
+          }
+          for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
+            removeItem(i);
+          }
+        }
+      }
+      // Reset for the next one
+      isQueuing = false;
+      openingTabs--;
+    });
+  }, (openingTabs * interval));
 }
 // LISTENERS
 // "OnLoad" listener to set the default options
