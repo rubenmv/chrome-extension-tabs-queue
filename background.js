@@ -8,7 +8,7 @@ var queues = []; // Array of Queue objects
 // so they will be opened one after another, not simultaneously
 var openingTabs = 0;
 // Interval when opening several tabs at the "same" time, this way they won't mess up with the queue
-var interval = 500; //ms
+var interval = 0; //ms
 
 // When a new tab is queued, it's instantly removed
 // this flag alerts not to open a new tab when this happens
@@ -39,22 +39,30 @@ function Item(id, windowId, url, state) {
 }
 
 // Adds move function to Array. Moves an item from one position to another
-Array.prototype.move = function (old_index, new_index) {
-  while (old_index < 0) {
-    old_index += this.length;
+Array.prototype.move = function (oldIndex, newIndex) {
+  while (oldIndex < 0) {
+    oldIndex += this.length;
   }
-  while (new_index < 0) {
-    new_index += this.length;
+  while (newIndex < 0) {
+    newIndex += this.length;
   }
-  if (new_index >= this.length) {
-    var k = new_index - this.length;
+  if (newIndex >= this.length) {
+    var k = newIndex - this.length;
     while ((k--) + 1) {
       this.push(undefined);
     }
   }
-  this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+  this.splice(newIndex, 0, this.splice(oldIndex, 1)[0]);
   return this; // for testing purposes
 };
+
+/**
+ * Moves item position from specific queue
+ */
+function moveItemInQueue(queueId, oldPos, newPos) {
+  var queue = getQueue(queueId).items;
+  queue.move(oldPos, newPos);
+}
 
 function setActive(active) {
   isActive = active;
@@ -190,7 +198,11 @@ function saveItem(item) {
       }
     }
     // Push to queue
+    console.log("new item into queue");
     currentQueue.push(item);
+    //console.log(item);
+    //console.log(currentQueue);
+    console.log(queues);
     // Add to storage
     var itemIndex = currentQueue.length - 1,
       values = {};
@@ -294,8 +306,12 @@ function openAllItems() {
  * Removes all items in queue
  */
 function clearItems() {
+  console.log("Clearing items");
   chrome.windows.getLastFocused(function (windowInfo) {
+    console.log("Last focused window info:");
+    console.log(windowInfo);
     var currentQueue = getQueue(windowInfo.id);
+    console.log(currentQueue);
     currentQueue.items = [];
     chrome.storage.local.clear();
     updateBadgeCounter();
@@ -305,6 +321,7 @@ function clearItems() {
 // Simply save the new tab id and check later when url gets updated
 // this fixes the problem with blank url when opening a link with target="_blank"
 function onCreatedTab(newTab) {
+  //console.log("onCreatedTab, isActive? " + isActive);
   if (!isActive) {
     return;
   }
@@ -313,6 +330,7 @@ function onCreatedTab(newTab) {
 }
 // New tab created, check limit and add to queue
 function onUpdatedTab(tabId, tabInfo, tabState) {
+  //console.log("onUpdateTab, isActive? " + isActive);
   if (!isActive) {
     return;
   }
@@ -365,6 +383,7 @@ function queueTab(tabState) {
 
 // Tab removed, check if there's something in the queue
 function onRemovedTab() {
+  //console.log("onRemovedTab, isActive? " + isActive);
   if (!isActive) {
     return;
   }
@@ -379,7 +398,7 @@ function onRemovedTab() {
       if (windowTabs.length == 0) {
         return;
       }
-      console.log("open tab" + (openingTabs * interval));
+      //console.log("open tab " + (openingTabs * interval));
       var windowId = windowTabs[0].windowId;
       var currentQueue = getQueue(windowId).items;
       // Get number of opened tabs, whitelisted and pinned excluded
