@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Tabs Queue</title>
   <link rel="stylesheet" href="popup.css" />
+  <link rel="stylesheet" href="common.css" />
   <link rel="stylesheet" href="onoff-switch.css" />
 </head>
 
@@ -21,19 +22,13 @@
     <div class="left">
       <h2 id="url-list-info">Queue is empty</h2>
     </div>
-    <!--<div class="right">
-      <button id="button-openall">Open all</button>
-    </div>
     <div class="right">
-      <button id="button-queueall">Queue all except active</button>
-    </div>-->
-    <div class="right">
-      <button id="button-clear">Clear all</button>
+      <button id="button-clear" class="btn">Clear all</button>
       <!--Hidden confirmation dialog-->
       <div id="clearConfirm">
         <span>Are you sure?</span>
-        <button id="clearYes">Yes</button>
-        <button id="clearNo">No</button>
+        <button id="clearYes" class="btn">Yes</button>
+        <button id="clearNo" class="btn">No</button>
       </div>
     </div>
   </div>

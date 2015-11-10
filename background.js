@@ -4,11 +4,6 @@ var tabsWaitingArray = []; // Tabs waiting for url update (before queuing)
 var tabLimit = 10;
 var allowDuplicates = false;
 var queues = []; // Array of Queue objects
-// Indicates the number of simultaneous tabs that need to be opened
-// so they will be opened one after another, not simultaneously
-var openingTabs = 0;
-// Interval when opening several tabs at the "same" time, this way they won't mess up with the queue
-var interval = 0; //ms
 
 // When a new tab is queued, it's instantly removed
 // this flag alerts not to open a new tab when this happens
@@ -18,7 +13,7 @@ var isQueuing = false;
 var whitelist = [/^chrome[:|-].*/];
 var ICON_MAX_KEYS = 14;
 var ICON_DEFAULT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC';
-
+var ICON_DISABLED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=';
 
 /**
  * Queue class
@@ -31,11 +26,12 @@ function Queue(windowId) {
 /**
  * Item class. Contains info about the tab saved in queue.
  */
-function Item(id, windowId, url, state) {
+function Item(id, windowId, url, state, locked) {
   this.id = id,
   this.window = windowId,
   this.url = url,
   this.state = state;
+  this.locked = locked;
 }
 
 // Adds move function to Array. Moves an item from one position to another
@@ -64,8 +60,17 @@ function moveItemInQueue(queueId, oldPos, newPos) {
   queue.move(oldPos, newPos);
 }
 
+/**
+ * Change active state and browser action icon
+ */
 function setActive(active) {
   isActive = active;
+  var icon = isActive ? ICON_DEFAULT : ICON_DISABLED;
+
+  chrome.browserAction.setIcon({
+    path: icon
+  });
+  onRemovedTab();
 }
 
 /**
@@ -137,7 +142,7 @@ function initOptions() {
       }
     } else {
       // Default icon
-      iconString = ICON_DEFAULT;
+      iconString = isActive ? ICON_DEFAULT : ICON_DISABLED;
     }
     chrome.browserAction.setIcon({
       path: iconString
@@ -198,11 +203,7 @@ function saveItem(item) {
       }
     }
     // Push to queue
-    console.log("new item into queue");
     currentQueue.push(item);
-    //console.log(item);
-    //console.log(currentQueue);
-    console.log(queues);
     // Add to storage
     var itemIndex = currentQueue.length - 1,
       values = {};
@@ -220,13 +221,14 @@ function saveItem(item) {
     updateBadgeCounter();
   });
 }
+
 /**
  * Removes item from queue and storage
  * @param  {int} index [Item's index in queue]
  */
 function removeItem(index) {
   chrome.windows.getLastFocused(function (windowInfo) {
-    var currentQueue = getQueue(windowInfo.id).items; 
+    var currentQueue = getQueue(windowInfo.id).items;
     // Not the last index, rearange queue
     var lastIndex = currentQueue.length - 1;
     var newValues = {};
@@ -246,6 +248,21 @@ function removeItem(index) {
     updateBadgeCounter();
   });
 }
+
+/**
+ * Changes the lock state an item in the current/active queue
+ */
+function setLock(index, value) {
+  chrome.windows.getLastFocused(function (windowInfo) {
+    var currentQueue = getQueue(windowInfo.id).items;
+    //console.log(currentQueue);
+    if (currentQueue.length > 0) {
+      currentQueue[index].locked = value;
+      //console.log(currentQueue[index]);
+    }
+  });
+}
+
 // Check if tab is on the wait list (new) and remove it
 function findRemoveTabWaiting(tabId) {
   for (var i = 0; i < tabsWaitingArray.length; i++) {
@@ -373,7 +390,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
 function queueTab(tabState) {
   if (!isInWhitelist(tabState.url)) {
     // Create item
-    var item = new Item(tabState.id, tabState.windowId, tabState.url, tabState.status);
+    var item = new Item(tabState.id, tabState.windowId, tabState.url, tabState.status, false);
     // Save to queue and local storage
     saveItem(item);
     isQueuing = true;
@@ -387,50 +404,53 @@ function onRemovedTab() {
   if (!isActive) {
     return;
   }
-  openingTabs++;
-  setTimeout(function () {
-    // Check how many tabs can we create
-    chrome.tabs.query({
-      windowId: chrome.windows.WINDOW_ID_CURRENT
-    }, function (windowTabs) {
-      // Windows like popups and other will also trigger
-      // if there are no tabs just cancel
-      if (windowTabs.length == 0) {
-        return;
+  // Check how many tabs can we create
+  chrome.tabs.query({
+    windowId: chrome.windows.WINDOW_ID_CURRENT
+  }, function (windowTabs) {
+    // Windows like popups and other will also trigger
+    // if there are no tabs just cancel
+    if (windowTabs.length == 0) {
+      return;
+    }
+    var windowId = windowTabs[0].windowId;
+    var currentQueue = getQueue(windowId).items;
+    // Get number of opened tabs, whitelisted and pinned excluded
+    var tabCount = 0;
+    for (var i = 0; i < windowTabs.length; i++) {
+      if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
+        tabCount++;
       }
-      //console.log("open tab " + (openingTabs * interval));
-      var windowId = windowTabs[0].windowId;
-      var currentQueue = getQueue(windowId).items;
-      // Get number of opened tabs, whitelisted and pinned excluded
-      var tabCount = 0;
-      for (var i = 0; i < windowTabs.length; i++) {
-        if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
-          tabCount++;
-        }
-      }
-      var freeSpace = tabLimit - tabCount;
-      // Free space and items waiting
-      if (freeSpace > 0 && currentQueue.length > 0) {
-        if (!isQueuing) {
-          // Create as many tabs as possible
-          // First create the tabs, then remove the items from queue
-          // after ALL new tabs have been created
-          for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
+    }
+    var freeSpace = tabLimit - tabCount;
+    var filledSpace = 0;
+    // Free space and items waiting
+    if (freeSpace > 0 && currentQueue.length > 0) {
+      if (!isQueuing) {
+        // Create as many tabs as possible
+        // First create the tabs, then remove the items from queue
+        // after ALL new tabs have been created
+        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
+          if (!currentQueue[i].locked) {
             chrome.tabs.create({
               url: currentQueue[i].url,
               active: false
             });
+            filledSpace++;
           }
-          for (i = 0; i < freeSpace && i < currentQueue.length; i++) {
+        }
+        filledSpace = 0;
+        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
+          if (!currentQueue[i].locked) {
             removeItem(i);
+            filledSpace++;
           }
         }
       }
-      // Reset for the next one
-      isQueuing = false;
-      openingTabs--;
-    });
-  }, (openingTabs * interval));
+    }
+    // Reset for the next one
+    isQueuing = false;
+  });
 }
 // LISTENERS
 // "OnLoad" listener to set the default options

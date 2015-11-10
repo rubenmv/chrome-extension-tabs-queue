@@ -56,7 +56,7 @@ $.ready(function () {
   document.getElementById('email-form').addEventListener("submit", function(e) {
     e.preventDefault();
   });
-  document.getElementById("btn-send-mail").addEventListener("click", function () {
+  document.getElementById("email-form").addEventListener("submit", function () {
     var sender = document.getElementById("email").value;
     var message = document.getElementById("message").value;
     sendMail(sender, message);

@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <title>Tabs limiter with queue settings</title>
   <link rel="stylesheet" href="options.css" />
+  <link rel="stylesheet" href="common.css" />
 </head>
 
 <body>
@@ -36,32 +37,12 @@
         <span>Duplicated tabs are not discarded.</span>
       </div>
     </div>
-    <!--Icon-->
-    <h2>ICON</h2>
-    <div class="section">
-      <div class="controls">
-        <!--Base64 here (icons/default-32.png), makes it easy to load and save options later-->
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC"
-        alt="icon" id="iconImage" />
-        <div id="iconFileSelectors">
-          <label>Upload from hard drive</label>
-          <br>
-          <input type="file" id="iconFilePicker" />
-          <br>
-          <span id="statusIcon" class="alert"></span>
-        </div>
-      </div>
-      <div class="help">
-        <span>Sets the icon on the button.</span>
-        <br>
-        <span class="warning">JPG/PNG/ICO format and 19x19px is recommended or it will be resized and may not look good.<br>Maximum size of 100KB.</span>
-        <br />
-        <button id="iconRestore">Restore default</button>
-      </div>
-    </div>
-    <button id="save">Save</button>
+    <!-- Save -->
+    <button id="save" class="btn">Save</button>
     <span id="status" class="alert"></span>
+    <!-- FOOTER -->
     <footer>
+    <!-- FEEDBACK -->
       <h2>feedback</h2>
       <div>
         <p>
@@ -70,10 +51,10 @@
           <form id="email-form" enctype="text/plain">
             <fieldset>
               <label for="email">Your Email</label>
-              <input id="email" type="email" placeholder="Your Email">
+              <input id="email" type="email" placeholder="Your Email" required>
               <label for="message">Tell me something</label>
-              <textarea id="message" placeholder="Write your message here"></textarea>
-              <button id="btn-send-mail">Send email</button>
+              <textarea id="message" placeholder="Write your message here" required></textarea>
+              <button id="btn-send-mail" class="btn">Send email</button>
               <span id="email-result" class="alert"></span>
             </fieldset>
           </form>
@@ -96,7 +77,7 @@
       </div>
     </footer>
   </div>
-  <script src="minified-legacyie.js"></script>
+  <script src="minified.js"></script>
   <script src="options.js"></script>
   <script src="utils.js"></script>
 </body>
