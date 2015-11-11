@@ -20,7 +20,7 @@
     options.tabLimit = tabLimit;
     options.allowDuplicates = allowDuplicates;
 
-    chrome.storage.sync.set(options, function () {
+    chrome.storage.local.set(options, function () {
       // Update status to let user know options were saved.
       var status = document.getElementById('status');
       status.textContent = 'Options saved';
@@ -46,7 +46,7 @@
     /*  *************
       Get the items from localStorage
          ************* */
-    chrome.storage.sync.get(options, function (items) {
+    chrome.storage.local.get(options, function (items) {
       // Check for error
       if (chrome.runtime.lastError !== undefined) {
         console.error("An error ocurred restoring options: " + chrome.runtime.lastError);
