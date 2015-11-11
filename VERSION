@@ -1,12 +1,12 @@
 1.1 - 2015.11.09
 - Separate queues per window.
-- Confirmation dialog to clear all button.
+- "Clear all" confirmation dialog.
 - Drag and drop items to manually sort queue.
 - Button to enable/disable the extension functionality.
 - Different icon to identify the state of the extension.
 - Lock items in queue. Won't load automatically or be deleted on click.
 - By default duplicated urls won't queue and will move the existing item to the top of the queue.
-- Option to allow duplicates.
+- Option to enable/disable duplicates.
 - Added feedback module to options page.
 
 1.0 - 2014.09.10
