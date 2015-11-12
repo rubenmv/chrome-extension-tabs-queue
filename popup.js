@@ -70,11 +70,11 @@ function toggleLock(e) {
   e.target.setAttribute('data-checked', state.toString());
   var image = state ? 'images/lock-enabled.png' : 'images/lock-disabled.png';
   e.target.setAttribute('src', image);
-  bgPage.setLock(liElement.value, state);
+  bgPage.setLock(queueId, liElement.value, state);
 }
 
 function clearAll() {
-  bgPage.clearItems();
+  bgPage.clearItems(queueId);
   window.close();
 }
 
@@ -85,7 +85,7 @@ function onSwitchChanged(e) {
 /**
  * Remove item
  */
-function removeItem(e) {
+function deleteItem(e) {
   var liElement = e.target.parentNode;
   liElement.parentNode.removeChild(liElement);
   bgPage.removeItem(liElement.value); // index
@@ -117,7 +117,7 @@ function createItem(index, url, locked) {
   remove.setAttribute('class', 'item-remove');
   remove.textContent = 'x  ';
   remove.style.display = 'none';
-  remove.addEventListener('click', removeItem);
+  remove.addEventListener('click', deleteItem);
   // Append in order
   liElement.appendChild(handle);
   liElement.appendChild(lock);
@@ -140,6 +140,7 @@ function getBackgroundInfo() {
   'use strict';
   chrome.windows.getLastFocused(function (windowInfo) {
     queueId = windowInfo.id;
+    console.log("Opening popup in window: " + queueId);
     var info = document.getElementById('url-list-info'),
       urlList = document.getElementById('url-list'),
       urlArray = bgPage.getQueue(queueId).items;

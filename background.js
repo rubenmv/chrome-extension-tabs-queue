@@ -1,3 +1,5 @@
+/*global chrome*/
+
 var isActive = true; // Extension is active?
 //var urlQueue = [];
 var tabsWaitingArray = []; // Tabs waiting for url update (before queuing)
@@ -169,7 +171,7 @@ function init() {
     if (data.hasOwnProperty('queues')) {
       queues = JSON.parse(data.queues);
       restoreAllQueues();
-      cleanAndStore();      
+      cleanAndStore();
     }
 
     var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
@@ -186,16 +188,18 @@ function init() {
  */
 function openQueueInWindow(queue) {
   chrome.windows.create(
-      {
-        'focused': false
-      }, function(windowInfo) {
-        // Update queue and items with the new window id
-        queue.window = windowInfo.id;
-        var items = queue.items;
-        for (var j = 0; j < items.length; j++) {
-          items[j].window = windowInfo.id;
-        }
+    {
+      'focused': false
+    }, function (windowInfo) {
+      // Update queue and items with the new window id
+      queue.window = windowInfo.id;
+      var items = queue.items;
+      for (var j = 0; j < items.length; j++) {
+        items[j].window = windowInfo.id;
       }
+      // Open items in queue to fill limit
+      checkOpenNextItem(windowInfo.id);
+    }
     );
 }
 
@@ -203,14 +207,14 @@ function openQueueInWindow(queue) {
  * Opens a new window per queue and updates their ids
  */
 function restoreAllQueues() {
-  if(queues.length === 0) {
+  if (queues.length === 0) {
     return;
   }
   // Need to do it this way because the callback from windows.create
   // gets called after the for loop has finished and 'i' is wrong value 
   for (var i = 0; i < queues.length; i++) {
     openQueueInWindow(queues[i]);
-  } 
+  }
 }
 
 /**
@@ -265,15 +269,14 @@ function removeItem(queueId, index) {
 /**
  * Changes the lock state an item in the current/active queue
  */
-function setLock(index, value) {
-  chrome.windows.getLastFocused(function (windowInfo) {
-    var currentQueue = getQueue(windowInfo.id).items;
-    //console.log(currentQueue);
-    if (currentQueue.length > 0) {
-      currentQueue[index].locked = value;
-      cleanAndStore();
-    }
-  });
+function setLock(queueId, index, value) {
+  console.log("Setting lock to item on window: " + queueId);
+  var currentQueue = getQueue(queueId).items;
+  //console.log(currentQueue);
+  if (currentQueue.length > 0) {
+    currentQueue[index].locked = value;
+    cleanAndStore();
+  }
 }
 
 // Check if tab is on the wait list (new) and remove it
@@ -309,14 +312,11 @@ function isInWhitelist(url) {
 /**
  * Removes all items in queue
  */
-function clearItems() {
-  chrome.windows.getLastFocused(function (windowInfo) {
-    var currentQueue = getQueue(windowInfo.id);
-    currentQueue.items = [];
-    //chrome.storage.local.clear();
-    cleanAndStore();
-    updateBadgeCounter();
-  });
+function clearItems(queueId) {
+  var currentQueue = getQueue(queueId);
+  currentQueue.items = [];
+  cleanAndStore();
+  updateBadgeCounter();
 }
 
 // Simply save the new tab id and check later when url gets updated
@@ -335,7 +335,9 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
   }
   //Pinned tab = removed tab
   if (tabInfo.pinned) {
-    onRemovedTab();
+    // Trigger opening next in queue
+    checkOpenNextItem(tabState.windowId);
+    //onRemovedTab(tabId, removeInfo);
     return;
   }
   //First check if the updated tab is one of the new ones
@@ -380,22 +382,19 @@ function queueTab(tabState) {
   }
 }
 
-// Tab removed, check if there's something in the queue
-function onRemovedTab(tabId, removeInfo) {
-  //console.log("onRemovedTab, isActive? " + isActive);
-  if (!isActive) {
-    return;
-  }
+/**
+ * Try to open next item in queue
+ */
+function checkOpenNextItem(windowId) {
   // Check how many tabs can we create
   chrome.tabs.query({
-    windowId: removeInfo.windowId
+    windowId: windowId
   }, function (windowTabs) {
     // Windows like popups and other will also trigger
     // if there are no tabs just cancel
     if (windowTabs.length == 0) {
       return;
     }
-    var windowId = removeInfo.windowId;
     var currentQueue = getQueue(windowId).items;
     // Get number of opened tabs, whitelisted and pinned excluded
     var tabCount = 0;
@@ -405,6 +404,8 @@ function onRemovedTab(tabId, removeInfo) {
       }
     }
     var freeSpace = tabLimit - tabCount;
+    console.log("try opening tab in window: " + windowId);
+    console.log(queues);
     var filledSpace = 0;
     // Free space and items waiting
     if (freeSpace > 0 && currentQueue.length > 0) {
@@ -424,7 +425,7 @@ function onRemovedTab(tabId, removeInfo) {
         filledSpace = 0;
         for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
           if (!currentQueue[i].locked) {
-            removeItem(removeInfo.windowId, i);
+            removeItem(windowId, i);
             filledSpace++;
           }
         }
@@ -433,6 +434,14 @@ function onRemovedTab(tabId, removeInfo) {
     // Reset for the next one
     isQueuing = false;
   });
+}
+
+// Tab removed, check if there's something in the queue
+function onRemovedTab(tabId, removeInfo) {
+  if (!isActive) {
+    return;
+  }
+  checkOpenNextItem(removeInfo.windowId);
 }
 // LISTENERS
 // "OnLoad" listener to set the default options
