@@ -140,7 +140,6 @@ function getBackgroundInfo() {
   'use strict';
   chrome.windows.getLastFocused(function (windowInfo) {
     queueId = windowInfo.id;
-    console.log("Opening popup in window: " + queueId);
     var info = document.getElementById('url-list-info'),
       urlList = document.getElementById('url-list'),
       urlArray = bgPage.getQueue(queueId).items;
@@ -155,7 +154,6 @@ function getBackgroundInfo() {
         }
       });
       info.textContent = 'Items in queue';
-      console.log(urlArray);
       for (var i = 0; i < urlArray.length; i++) { 
         // Append item to list
         urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));

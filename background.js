@@ -1,5 +1,7 @@
 /*global chrome*/
 
+var firstTime = true;
+
 var isActive = true; // Extension is active?
 //var urlQueue = [];
 var tabsWaitingArray = []; // Tabs waiting for url update (before queuing)
@@ -149,6 +151,9 @@ function updateBadgeCounter() {
   });
 }
 
+/**
+ * Initialize settings and load queues
+ */
 function init() {
   document.removeEventListener('DOMContentLoaded');
   //sync.get callback, data received
@@ -171,7 +176,6 @@ function init() {
     if (data.hasOwnProperty('queues')) {
       queues = JSON.parse(data.queues);
       restoreAllQueues();
-      cleanAndStore();
     }
 
     var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
@@ -184,23 +188,73 @@ function init() {
 }
 
 /**
+ * Try to open next item in queue
+ */
+function checkOpenNextItem(windowId) {
+  // Check how many tabs can we create
+  chrome.tabs.query({
+    windowId: windowId
+  }, function (windowTabs) {
+    // Windows like popups and other will also trigger
+    // if there are no tabs just cancel
+    if (windowTabs.length == 0) {
+      return;
+    }
+    var currentQueue = getQueue(windowId).items;
+    
+    // Get number of opened tabs, whitelisted and pinned excluded
+    var tabCount = 0;
+    for (var i = 0; i < windowTabs.length; i++) {
+      if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
+        tabCount++;
+      }
+    }
+    var freeSpace = tabLimit - tabCount;
+    var filledSpace = 0;
+    // Free space and items waiting
+    if (freeSpace > 0 && currentQueue.length > 0) {
+      if (!isQueuing) {
+        // Create as many tabs as possible
+        // First create the tabs, then remove the items from queue
+        // after ALL new tabs have been created
+        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
+          if (!currentQueue[i].locked) {
+            chrome.tabs.create({
+              "windowId": windowId,
+              "url": currentQueue[i].url,
+              "active": false
+            });
+            filledSpace++;
+          }
+        }
+        filledSpace = 0;
+        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
+          if (!currentQueue[i].locked) {
+            removeItem(windowId, i);
+            filledSpace++;
+          }
+        }
+      }
+    }
+    // Reset for the next one
+    isQueuing = false;
+  });
+}
+
+/**
  * Open new window with associated queue
  */
 function openQueueInWindow(queue) {
-  chrome.windows.create(
-    {
-      'focused': false
-    }, function (windowInfo) {
-      // Update queue and items with the new window id
-      queue.window = windowInfo.id;
-      var items = queue.items;
-      for (var j = 0; j < items.length; j++) {
-        items[j].window = windowInfo.id;
-      }
-      // Open items in queue to fill limit
-      checkOpenNextItem(windowInfo.id);
+  chrome.windows.create({ 'focused': false }, function (windowInfo) {
+    // Update queue and items with the new window id
+    queue.window = windowInfo.id;
+    var items = queue.items;
+    for (var j = 0; j < items.length; j++) {
+      items[j].window = windowInfo.id;
     }
-    );
+    // Open items in queue to fill limit
+    checkOpenNextItem(windowInfo.id);
+  });
 }
 
 /**
@@ -209,6 +263,14 @@ function openQueueInWindow(queue) {
 function restoreAllQueues() {
   if (queues.length === 0) {
     return;
+  }
+  // First cleanup all reference to window ids to prevent mixup
+  for (var i = 0; i < queues.length; i++) {
+    var q = queues[i];
+    q.window = -1;
+    for (var j = 0; j < q.items.length; j++) {
+      q.items[j].window = -1;
+    }
   }
   // Need to do it this way because the callback from windows.create
   // gets called after the for loop has finished and 'i' is wrong value 
@@ -270,9 +332,7 @@ function removeItem(queueId, index) {
  * Changes the lock state an item in the current/active queue
  */
 function setLock(queueId, index, value) {
-  console.log("Setting lock to item on window: " + queueId);
   var currentQueue = getQueue(queueId).items;
-  //console.log(currentQueue);
   if (currentQueue.length > 0) {
     currentQueue[index].locked = value;
     cleanAndStore();
@@ -329,7 +389,6 @@ function onCreatedTab(newTab) {
 }
 // New tab created, check limit and add to queue
 function onUpdatedTab(tabId, tabInfo, tabState) {
-  //console.log("onUpdateTab, isActive? " + isActive);
   if (!isActive) {
     return;
   }
@@ -380,60 +439,6 @@ function queueTab(tabState) {
     isQueuing = true;
     chrome.tabs.remove(tabState.id);
   }
-}
-
-/**
- * Try to open next item in queue
- */
-function checkOpenNextItem(windowId) {
-  // Check how many tabs can we create
-  chrome.tabs.query({
-    windowId: windowId
-  }, function (windowTabs) {
-    // Windows like popups and other will also trigger
-    // if there are no tabs just cancel
-    if (windowTabs.length == 0) {
-      return;
-    }
-    var currentQueue = getQueue(windowId).items;
-    // Get number of opened tabs, whitelisted and pinned excluded
-    var tabCount = 0;
-    for (var i = 0; i < windowTabs.length; i++) {
-      if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
-        tabCount++;
-      }
-    }
-    var freeSpace = tabLimit - tabCount;
-    console.log("try opening tab in window: " + windowId);
-    console.log(queues);
-    var filledSpace = 0;
-    // Free space and items waiting
-    if (freeSpace > 0 && currentQueue.length > 0) {
-      if (!isQueuing) {
-        // Create as many tabs as possible
-        // First create the tabs, then remove the items from queue
-        // after ALL new tabs have been created
-        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
-          if (!currentQueue[i].locked) {
-            chrome.tabs.create({
-              url: currentQueue[i].url,
-              active: false
-            });
-            filledSpace++;
-          }
-        }
-        filledSpace = 0;
-        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
-          if (!currentQueue[i].locked) {
-            removeItem(windowId, i);
-            filledSpace++;
-          }
-        }
-      }
-    }
-    // Reset for the next one
-    isQueuing = false;
-  });
 }
 
 // Tab removed, check if there's something in the queue
