@@ -1,24 +1,23 @@
 /*global chrome*/
+"use strict";
 
-var firstTime = true;
-
-var isActive = true; // Extension is active?
-//var urlQueue = [];
-var tabsWaitingArray = []; // Tabs waiting for url update (before queuing)
-var tabLimit = 10;
-var allowDuplicates = false;
-var queues = []; // Array of queued items
-
-// When a new tab is queued, it is instantly closed
-// this flag alerts not to open a new tab when this happens (onRemovedTab)
-var isQueuing = false;
+var
+  DEFAULT_ID = -1,
+  whitelist = [/^chrome[:|-].*/],
+  // Is extension active?
+  isActive = true,
+  // When a new tab is queued, it is instantly closed
+  // this flag alerts not to open a new tab when this happens (onRemovedTab)
+  isQueuing = false,
+  // Tabs waiting for url update (before queuing)
+  tabsWaitingArray = [],
+  tabLimit = 10,
+  allowDuplicates = false,
+  queues = []; // Array of queued items
 
 // Regular expressions for url exclusions
-var whitelist = [/^chrome[:|-].*/];
 var ICON_DEFAULT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC';
 var ICON_DISABLED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=';
-
-var savingQueues = false;
 
 /**
  * Queue class
@@ -65,6 +64,10 @@ function cleanAndStore() {
   // First cleanup
   var i = 0;
   while (i < queues.length) {
+    // Reset id if window was closed
+    
+    
+    // Remove empty queues
     if (queues[i].items.length === 0) {
       queues.splice(i, 1);
     }
@@ -78,11 +81,7 @@ function cleanAndStore() {
     if (chrome.runtime.lastError !== undefined) {
       console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
       console.error(chrome.runtime.lastError);
-      return;
     }
-    /*chrome.storage.local.get(null, function(data){
-      console.log(JSON.parse(data['queues']));
-    });*/
   });
 }
 
@@ -104,6 +103,13 @@ function setActive(active) {
   chrome.storage.local.set({ 'isActive': isActive });
   // Change icon
   var icon = isActive ? ICON_DEFAULT : ICON_DISABLED;
+  
+  // Check all queues and try to fill limit
+  if (isActive) {
+    for (var i = 0; i < queues.length; i++) {
+      checkOpenNextItems(queues[i].window);
+    }
+  }
 
   chrome.browserAction.setIcon({
     path: icon
@@ -142,11 +148,11 @@ function updateBadgeCounter() {
       badgeColor = '#ff0000';
     }
     chrome.browserAction.setBadgeBackgroundColor({
-      color: badgeColor,
+      "color": badgeColor,
     });
     chrome.browserAction.setBadgeText({
-      text: currentQueue.length.toString(),
-      tabId: currentTab.id
+      "text": currentQueue.length.toString(),
+      "tabId": currentTab.id
     });
   });
 }
@@ -180,7 +186,7 @@ function init() {
 
     var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
     chrome.browserAction.setIcon({
-      path: iconPath
+      "path": iconPath
     });
   }
   // Get the options from sync storage
@@ -190,7 +196,7 @@ function init() {
 /**
  * Try to open next item in queue
  */
-function checkOpenNextItem(windowId) {
+function checkOpenNextItems(windowId) {
   // Check how many tabs can we create
   chrome.tabs.query({
     windowId: windowId
@@ -253,7 +259,7 @@ function openQueueInWindow(queue) {
       items[j].window = windowInfo.id;
     }
     // Open items in queue to fill limit
-    checkOpenNextItem(windowInfo.id);
+    checkOpenNextItems(windowInfo.id);
   });
 }
 
@@ -267,9 +273,9 @@ function restoreAllQueues() {
   // First cleanup all reference to window ids to prevent mixup
   for (var i = 0; i < queues.length; i++) {
     var q = queues[i];
-    q.window = -1;
+    q.window = DEFAULT_ID;
     for (var j = 0; j < q.items.length; j++) {
-      q.items[j].window = -1;
+      q.items[j].window = DEFAULT_ID;
     }
   }
   // Need to do it this way because the callback from windows.create
@@ -395,7 +401,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
   //Pinned tab = removed tab
   if (tabInfo.pinned) {
     // Trigger opening next in queue
-    checkOpenNextItem(tabState.windowId);
+    checkOpenNextItems(tabState.windowId);
     //onRemovedTab(tabId, removeInfo);
     return;
   }
@@ -441,13 +447,40 @@ function queueTab(tabState) {
   }
 }
 
-// Tab removed, check if there's something in the queue
+/**
+ * Tab removed, check if there's something in the queue
+ */
 function onRemovedTab(tabId, removeInfo) {
   if (!isActive) {
     return;
   }
-  checkOpenNextItem(removeInfo.windowId);
+  checkOpenNextItems(removeInfo.windowId);
 }
+
+/**
+ * Check related queue and reset its id
+ */
+function onWindowRemoved(id) {
+  var queue = getQueue(id);
+  if (queue.items.length > 0) {
+    queue.window = DEFAULT_ID;
+    for (var i = 0; i < queue.items.length; i++) {
+      queue.items[i].window = DEFAULT_ID;
+    }
+  }
+}
+
+/**
+ * Open all saved queues in new windows
+ */
+function restoreSavedQueues() {
+  for (var i = 0; i < queues.length; i++) {
+    if(queues[i].window === DEFAULT_ID) {
+      openQueueInWindow(queues[i]);
+    }
+  }
+}
+
 // LISTENERS
 // "OnLoad" listener to set the default options
 document.addEventListener('DOMContentLoaded', init);
@@ -456,3 +489,4 @@ chrome.tabs.onCreated.addListener(onCreatedTab);
 chrome.tabs.onRemoved.addListener(onRemovedTab);
 chrome.tabs.onUpdated.addListener(onUpdatedTab);
 chrome.tabs.onActivated.addListener(updateBadgeCounter);
+chrome.windows.onRemoved.addListener(onWindowRemoved);
