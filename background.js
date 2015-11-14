@@ -347,7 +347,9 @@ function setLock(queueId, index, value) {
   }
 }
 
-// Check if tab is on the wait list (new) and remove it
+/**
+ * Check if tab is on the wait list (new) and remove it
+ */
 function findRemoveTabWaiting(tabId) {
   for (var i = 0; i < tabsWaitingArray.length; i++) {
     if (tabId === tabsWaitingArray[i].id) {
@@ -357,7 +359,9 @@ function findRemoveTabWaiting(tabId) {
   }
   return false;
 }
-// Check if url is in queue. Returns index, -1 if not found
+/**
+ * Check if url is in queue. Returns index, -1 if not found
+ */
 function findInQueue(queue, url) {
   var currentQueue = getQueue(queue).items;
   for (var i = 0; i < currentQueue.length; i++) {
@@ -367,7 +371,9 @@ function findInQueue(queue, url) {
   }
   return -1;
 }
-//Check if the url matches something in whitelist
+/**
+ * Check if the url matches something in whitelist
+ */
 function isInWhitelist(url) {
   for (var i = 0; i < whitelist.length; i++) {
     if (whitelist[i].test(url)) {
@@ -387,15 +393,19 @@ function clearItems(queueId) {
   updateBadgeCounter();
 }
 
-// Simply save the new tab id and check later when url gets updated
-// this fixes the problem with blank url when opening a link with target="_blank"
+/**
+ * Simply save the new tab id and check later when url gets updated
+ * this fixes the problem with blank url when opening a link with target="_blank"
+ */
 function onCreatedTab(newTab) {
   if (!isActive) {
     return;
   }
   tabsWaitingArray.push(newTab);
 }
-// New tab created, check limit and add to queue
+/**
+ * New tab created, check limit and add to queue
+ */
 function onUpdatedTab(tabId, tabInfo, tabState) {
   if (!isActive) {
     return;
