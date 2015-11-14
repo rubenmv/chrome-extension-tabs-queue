@@ -91,10 +91,12 @@ img#iconImage {
 	max-width: 64px;
 	max-height: 64px;
 }
-label.label2 {
+label.label2 { 
 	font-weight: normal;
 }
 hr {
+	border: 1px dashed #ccc;
+	border-bottom: none;
 	margin: 1em 0;
 }
 .section {

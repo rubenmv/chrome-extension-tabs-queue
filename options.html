@@ -15,9 +15,9 @@
   </header>
   <div id="wrapper-main">
     <!--Tab limits-->
-    <h2>Tabs limit</h2>
     <div class="section">
       <div class="controls">
+        <span>Limit: </span>
         <input type="number" min="1" value="10" id="tabLimit" />
         <span id="statusTabLimit" class="alert"></span>
       </div>
@@ -35,6 +35,14 @@
       </div>
       <div class="help">
         <span>Duplicated tabs are not discarded.</span>
+      </div>
+      <hr>
+      <div class="controls">
+        <input id="restoreOnStart" type="checkbox" name="restoreOnStart" value="restoreOnStart">
+        <label for="restoreOnStart">Restore on start</label>
+      </div>
+      <div class="help">
+        <span>When Chrome starts open saved queues into different windows.</span>
       </div>
     </div>
     <!-- Save -->

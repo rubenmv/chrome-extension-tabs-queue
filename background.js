@@ -179,15 +179,17 @@ function init() {
     if (data.hasOwnProperty('isActive')) {
       isActive = data.isActive;
     }
-    if (data.hasOwnProperty('queues')) {
-      queues = JSON.parse(data.queues);
-      restoreAllQueues();
-    }
-
     var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
     chrome.browserAction.setIcon({
       "path": iconPath
     });
+    if (data.hasOwnProperty('queues')) {
+      queues = JSON.parse(data.queues);
+    }
+    // Restore queues on start?
+    if (data.hasOwnProperty('restoreOnStart') && data.restoreOnStart) {
+      restoreAllQueues();
+    }
   }
   // Get the options from sync storage
   chrome.storage.local.get(null, optionsDataRetrieved);
