@@ -190,6 +190,7 @@ function getBackgroundInfo() {
  */
 function onRestore() {
   bgPage.restoreSavedQueues();
+  window.close();
 }
 
 /**
@@ -200,8 +201,8 @@ function onSavedListClick(evt) {
   if (evt.target.className !== "btn") {
     return;
   }
-  console.log("Restoring queue: " + evt.target.getAttribute("data-queue"));
   bgPage.restoreQueue(evt.target.getAttribute("data-queue"));
+  window.close();
 }
 
 /**
@@ -233,7 +234,6 @@ function loadSavedQueues() {
       span.appendChild(button);
       li.appendChild(span);
       list.appendChild(li);
-      console.log("Listing queue " + qus[i].window + " in position " + i);
     }
   }
   // Listen to clicks on list

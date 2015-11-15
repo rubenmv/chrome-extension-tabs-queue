@@ -1,7 +1,9 @@
-1.1 - 2015.11.09
+1.1 - 2015.11.15
 - Separate queues per window.
 - "Clear all" confirmation dialog.
-- Drag and drop items to manually sort queue.
+- Basic saved queues management.
+- Drag and drop items to manually sort current queue.
+- Restore queues manually or automatically (on start).
 - Button to enable/disable the extension functionality.
 - Different icon to identify the state of the extension.
 - Lock items in queue. Won't load automatically or be deleted on click.
