@@ -170,7 +170,7 @@ function getBackgroundInfo() {
   });
 
   loadSavedQueues();
-  document.getElementById("buttonRestore").addEventListener("click", onRestore);
+  document.getElementById("buttonRestoreAll").addEventListener("click", onRestore);
 
   // After init add the other listeners
   var switchButton = document.getElementById("myonoffswitch");
@@ -193,21 +193,54 @@ function onRestore() {
 }
 
 /**
+ * Manages clicks on saved queues list
+ */
+function onSavedListClick(evt) {
+  evt.stopPropagation();
+  if (evt.target.className !== "btn") {
+    return;
+  }
+  console.log("Restoring queue: " + evt.target.getAttribute("data-queue"));
+  bgPage.restoreQueue(evt.target.getAttribute("data-queue"));
+}
+
+/**
  * 
  */
 function loadSavedQueues() {
-  var queues = bgPage.queues;
-  var list = document.getElementById("savedQueuesList");
-  var savedCount = 0;
-  for (var i = 0; i < queues.length; i++) {
-    if (queues[i].window === bgPage.DEFAULT_ID) {
+  var
+    qus = bgPage.queues,
+    list = document.getElementById("savedQueuesList"),
+    savedCount = 0,
+    li = null;
+  for (var i = 0; i < qus.length; i++) {
+    if (qus[i].window === bgPage.DEFAULT_ID) {
       savedCount++;
-      /*var li = document.createElement("li");
-      li.textContent = JSON.stringify(queues[i].items);
-      list.appendChild(li);*/
+      // LI element
+      li = document.createElement("li");
+      // Title
+      var title = document.createElement("h3");
+      title.textContent = "Queue " + savedCount + " --- " + qus[i].items.length + " items";
+      title.setAttribute("class", "left");
+      li.appendChild(title);
+      // Button element to restore queue
+      var button = document.createElement("button");
+      button.setAttribute("class", "btn");
+      button.setAttribute("data-queue", i); // Position in list (ID is -1 for all saved queues)
+      button.textContent = "Restore";
+      var span = document.createElement("span");
+      span.setAttribute("class", "right");
+      span.appendChild(button);
+      li.appendChild(span);
+      list.appendChild(li);
+      console.log("Listing queue " + qus[i].window + " in position " + i);
     }
   }
-  list.textContent = "There are " + savedCount + " saved queues";
+  // Listen to clicks on list
+  list.addEventListener("click", onSavedListClick);
+  if (savedCount === 0) {
+    list.innerHTML = "<li>No saved queues</li>";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", getBackgroundInfo);

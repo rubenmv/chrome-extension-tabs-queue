@@ -18,6 +18,18 @@
       <span class="onoffswitch-switch"></span>
     </label>
   </div>
+  <!--Saved queues-->
+  <div class="caption">
+    <div class="left">
+      <h2>Saved queues</h2>
+    </div>
+    <div class="right">
+      <button id="buttonRestoreAll" class="btn">Restore all</button>
+    </div>
+  </div>
+  <ul id="savedQueuesList">
+  </ul>
+  <!---->
   <!--Current queue-->
   <div class="caption">
     <div class="left">
@@ -35,18 +47,6 @@
   </div>
   <ol id="url-list">
   </ol>
-  <!---->
-  <!--Saved queues-->
-  <div class="caption">
-    <div class="left">
-      <h2 id="url-list-info">Saved queues</h2>
-    </div>
-    <div class="right">
-      <button id="buttonRestore" class="btn">Restore all</button>
-    </div>
-  </div>
-  <div id="savedQueuesList">
-  </div>
   <!---->
   <script src="Sortable.min.js"></script>
   <script src="popup.js"></script>

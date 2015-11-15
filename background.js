@@ -196,7 +196,7 @@ function init() {
     }
     // Restore queues on start?
     if (data.hasOwnProperty('restoreOnStart') && data.restoreOnStart) {
-      restoreAllQueues();
+      restoreSavedQueues();
     }
     initQueues();
     setUpdater();
@@ -342,7 +342,7 @@ function initQueues() {
 /**
  * Opens a new window per queue and updates their ids
  */
-function restoreAllQueues() {
+/*function restoreAllQueues() {
   if (queues.length === 0) {
     return;
   }
@@ -351,6 +351,24 @@ function restoreAllQueues() {
   for (var i = 0; i < queues.length; i++) {
     openQueueInWindow(queues[i]);
   }
+}*/
+
+/**
+ * Open all saved queues in new windows
+ */
+function restoreSavedQueues() {
+  for (var i = 0; i < queues.length; i++) {
+    if (queues[i].window === DEFAULT_ID) {
+      openQueueInWindow(queues[i]);
+    }
+  }
+}
+
+/**
+ * Restore a queue given a position in the list
+ */
+function restoreQueue(position) {
+  openQueueInWindow(queues[position]);
 }
 
 /**
@@ -549,19 +567,9 @@ function onWindowRemoved(id) {
   }
 }
 
-/**
- * Open all saved queues in new windows
- */
-function restoreSavedQueues() {
-  for (var i = 0; i < queues.length; i++) {
-    if (queues[i].window === DEFAULT_ID) {
-      openQueueInWindow(queues[i]);
-    }
-  }
-}
+
 
 // LISTENERS
-// "OnLoad" listener to set the default options
 document.addEventListener('DOMContentLoaded', init);
 chrome.storage.onChanged.addListener(onSettingsChanged);
 chrome.tabs.onCreated.addListener(onCreatedTab);

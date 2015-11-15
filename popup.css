@@ -67,6 +67,10 @@ h2 {
   margin-bottom: 0.5em;
   margin-top: 0.5em;
 }
+h3 {
+  display: inline-block;
+  font-size: 1.3em;
+}
 ol, ul {
   /*list-style-position: inside;*/
   text-align: left;
