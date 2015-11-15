@@ -157,7 +157,7 @@ function getBackgroundInfo() {
           reindex(evt.oldIndex, evt.newIndex);
         }
       });
-      info.textContent = "Items in queue";
+      info.textContent = "Queue in this window";
       for (var i = 0; i < urlArray.length; i++) { 
         // Append item to list
         urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));
