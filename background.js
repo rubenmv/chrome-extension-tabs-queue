@@ -10,6 +10,7 @@ var
   // this flag alerts not to open a new tab when this happens (onRemovedTab)
   isQueuing = false,
   storing = false, // To check if currently there's a store operation waiting to finish
+  updater = null, // Saves interval function
   itemsToOpen = 0, // indicates if openNextItem() should be called again
   // Tabs waiting for url update (before queuing)
   tabsWaitingArray = [],
@@ -111,12 +112,13 @@ function setActive(active) {
   // Change icon
   var icon = isActive ? ICON_DEFAULT : ICON_DISABLED;
   
-  // Check all queues and try to fill limit
-  /*if (isActive) {
-    for (var i = 0; i < queues.length; i++) {
-      checkOpenNextItems(queues[i].window);
-    }
-  }*/
+  // Active/deactive update interval
+  if (isActive) {
+    setUpdater();
+  }
+  else {
+    window.clearInterval(updater);
+  }
   chrome.browserAction.setIcon({
     path: icon
   });
@@ -196,6 +198,8 @@ function init() {
     if (data.hasOwnProperty('restoreOnStart') && data.restoreOnStart) {
       restoreAllQueues();
     }
+    initQueues();
+    setUpdater();
   }
   // Get the options from sync storage
   chrome.storage.local.get(null, optionsDataRetrieved);
@@ -204,14 +208,18 @@ function init() {
 /**
  * Opens x number of items in queue one by one
  */
-function openNextItem(queueId) {
+/*function openNextItem(queueId) {
   var currentQueue = getQueue(queueId);
   if (currentQueue.items.length === 0) {
     return;
   }
+  var i = 0;
+  while(i < currentQueue.items.length && currentQueue.items[i].locked) {
+    i++;
+  }
   chrome.tabs.create({
     "windowId": queueId,
-    "url": currentQueue.items[0].url, // First item
+    "url": currentQueue.items[i].url, // First item
     "active": false
   }, function () {
     if (chrome.runtime.lastError !== undefined) {
@@ -228,17 +236,25 @@ function openNextItem(queueId) {
     }
     return;
   });
-}
+}*/
 
-window.setInterval(function () {
-  // Get all windows info
-  chrome.windows.getAll({ "windowTypes": ["normal"] }, function (windows) {
-    for (var i = 0; i < windows.length; i++) {
-      checkOpenNextItems(windows[i].id);
+/**
+ * Check tabs every 2 seconds and update badge counter
+ */
+function setUpdater() {
+  updater = window.setInterval(function () {
+    if (!isActive) {
+      return;
     }
-  });
-  updateBadgeCounter();
-}, 2000);
+    // Get all windows info
+    chrome.windows.getAll({ "windowTypes": ["normal"] }, function (windows) {
+      for (var i = 0; i < windows.length; i++) {
+        checkOpenNextItems(windows[i].id);
+      }
+    });
+    updateBadgeCounter();
+  }, 2000);
+}
 
 /**
  * Try to open next item in queue
@@ -265,25 +281,29 @@ function checkOpenNextItems(windowId) {
     }
     var freeSpace = tabLimit - tabCount;
     itemsToOpen = freeSpace;
-    //var filledSpace = 0;
     // Free space and items waiting
     if (freeSpace > 0 && currentQueue.length > 0) {
       if (!isQueuing) {
-        openNextItem(windowId); // Open items one by one recursively
-        /*// Create as many tabs as possible
+        //openNextItem(windowId); // Open items one by one recursively
+        // Create as many tabs as possible
         // First create the tabs, then remove the items from queue
         // after ALL new tabs have been created
-        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
-          if (!currentQueue[i].locked) {
+        var j = 0;
+        while(freeSpace > 0 && j < currentQueue.length) {
+          if (!currentQueue[j].locked) {
             chrome.tabs.create({
               "windowId": windowId,
-              "url": currentQueue[i].url,
+              "url": currentQueue[j].url,
               "active": false
             });
-            filledSpace++;
+            removeItem(windowId, j);
+            freeSpace--;
+          }
+          else {
+            j++;
           }
         }
-        filledSpace = 0;
+        /*filledSpace = 0;
         for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
           if (!currentQueue[i].locked) {
             removeItem(windowId, i);
@@ -366,14 +386,14 @@ function openQueueInWindow(queue) {
       items[j].window = windowInfo.id;
     }
     // Open items in queue to fill limit
-    checkOpenNextItems(windowInfo.id);
+    //checkOpenNextItems(windowInfo.id);
   });
 }
 
 /**
- * Opens a new window per queue and updates their ids
+ * Resets queues ids
  */
-function restoreAllQueues() {
+function initQueues() {
   if (queues.length === 0) {
     return;
   }
@@ -384,6 +404,15 @@ function restoreAllQueues() {
     for (var j = 0; j < q.items.length; j++) {
       q.items[j].window = DEFAULT_ID;
     }
+  }
+}
+
+/**
+ * Opens a new window per queue and updates their ids
+ */
+function restoreAllQueues() {
+  if (queues.length === 0) {
+    return;
   }
   // Need to do it this way because the callback from windows.create
   // gets called after the for loop has finished and 'i' is wrong value 
@@ -414,20 +443,19 @@ function onSettingsChanged(changes, namespace) {
  * Push new url to queue and save it in local storage
  */
 function saveItem(item) {
-  var windowQueue = getQueue(item.window).items;
+  var qu = getQueue(item.window).items;
   if (!allowDuplicates) {
     // If duplicate, don't push and move it to top
-    var p = findInQueue(windowQueue, item.url);
+    var p = findInQueue(qu, item.url);
     if (p >= 0) {
-      windowQueue.move(p, 0); // Move to top
+      qu.move(p, 0); // Move to top
       return;
     }
   }
   // Push to queue
-  windowQueue.push(item);
+  qu.push(item);
   // Update local storage and badge
   cleanAndStore();
-  //updateBadgeCounter();
 }
 
 /**
@@ -467,10 +495,10 @@ function findRemoveTabWaiting(tabId) {
 /**
  * Check if url is in queue. Returns index, -1 if not found
  */
-function findInQueue(queue, url) {
-  var currentQueue = getQueue(queue).items;
-  for (var i = 0; i < currentQueue.length; i++) {
-    if (currentQueue[i] == url) {
+function findInQueue(qu, url) {
+  //var currentQueue = getQueue(queue).items;
+  for (var i = 0; i < qu.length; i++) {
+    if (qu[i].url === url) {
       return i;
     }
   }
@@ -518,7 +546,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
   //Pinned tab = removed tab
   if (tabInfo.pinned) {
     // Trigger opening next in queue
-    checkOpenNextItems(tabState.windowId);
+    //checkOpenNextItems(tabState.windowId);
     //onRemovedTab(tabId, removeInfo);
     return;
   }
