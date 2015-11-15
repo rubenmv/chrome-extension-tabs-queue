@@ -8,8 +8,8 @@
       tabLimit = document.getElementById("tabLimit").value,
       allowDuplicates = document.getElementById("duplicates").checked,
       restoreOnStart = document.getElementById("restoreOnStart").checked;
-    if (tabLimit < 1) {
-      document.getElementById("statusTabLimit").textContent = "Incorrect value, minimum of 1.";
+    if (tabLimit < 2) {
+      document.getElementById("statusTabLimit").textContent = "Incorrect value, minimum of 2.";
       window.setTimeout(function () {
         document.getElementById("statusTabLimit").textContent = "";
       }, 3000);

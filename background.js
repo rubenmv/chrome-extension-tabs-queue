@@ -247,132 +247,64 @@ function setUpdater() {
       return;
     }
     // Get all windows info
-    chrome.windows.getAll({ "windowTypes": ["normal"] }, function (windows) {
+    chrome.windows.getAll({ "populate": true, "windowTypes": ["normal"] }, function (windows) {
       for (var i = 0; i < windows.length; i++) {
-        checkOpenNextItems(windows[i].id);
+        checkOpenNextItems(windows[i]);
       }
     });
     updateBadgeCounter();
-  }, 2000);
+  }, 1000);
 }
 
 /**
  * Try to open next item in queue
  * Works in conjunction with a timeout to trigger a new check
  */
-function checkOpenNextItems(windowId) {
+function checkOpenNextItems(wdw) {
   // Check how many tabs can we create
-  chrome.tabs.query({
-    windowId: windowId
-  }, function (windowTabs) {
-    // Windows like popups and other will also trigger
-    // if there are no tabs just cancel
-    if (windowTabs.length == 0) {
-      return;
-    }
-    var currentQueue = getQueue(windowId).items;
-    
-    // Get number of opened tabs, whitelisted and pinned excluded
-    var tabCount = 0;
-    for (var i = 0; i < windowTabs.length; i++) {
-      if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
-        tabCount++;
-      }
-    }
-    var freeSpace = tabLimit - tabCount;
-    itemsToOpen = freeSpace;
-    // Free space and items waiting
-    if (freeSpace > 0 && currentQueue.length > 0) {
-      if (!isQueuing) {
-        //openNextItem(windowId); // Open items one by one recursively
-        // Create as many tabs as possible
-        // First create the tabs, then remove the items from queue
-        // after ALL new tabs have been created
-        var j = 0;
-        while(freeSpace > 0 && j < currentQueue.length) {
-          if (!currentQueue[j].locked) {
-            chrome.tabs.create({
-              "windowId": windowId,
-              "url": currentQueue[j].url,
-              "active": false
-            });
-            removeItem(windowId, j);
-            freeSpace--;
-          }
-          else {
-            j++;
-          }
-        }
-        /*filledSpace = 0;
-        for (i = 0; filledSpace < freeSpace && i < currentQueue.length; i++) {
-          if (!currentQueue[i].locked) {
-            removeItem(windowId, i);
-            filledSpace++;
-          }
-        }*/
-      }
-    }
-    // Reset for the next one
-    isQueuing = false;
-  });
-}
-
-/**
- * Checks if there's enough space and waits to open a new tab
- */
-/*function openItem(windowId) {
-  var queue = getQueue(windowId);
-  // No more items, do nothing
-  if (queue.items.length === 0) {
+  // Windows like popups and other will also trigger
+  // if there are no tabs just cancel
+  if (wdw.tabs.length == 0) {
     return;
   }
-  // Tab currently opening, wait and try again 
-  else if (queue.openingTab) {
-    window.setTimeout(function () {
-      openItem(windowId);
-    }, 50); // ms
+  var currentQueue = getQueue(wdw.id).items;
+    
+  // Get number of opened tabs, whitelisted and pinned excluded
+  var tabCount = 0;
+  for (var i = 0; i < wdw.tabs.length; i++) {
+    if (!isInWhitelist(wdw.tabs[i].url) && !wdw.tabs[i].pinned) {
+      tabCount++;
+    }
   }
-  // Check for space and open tab
-  else {
-    queue.openingTab = true;
-   
-    // Check how many tabs can we create
-    chrome.tabs.query({
-      windowId: windowId
-    }, function (windowTabs) {
-      // If there are no tabs just cancel (popups and other window types)
-      if (windowTabs.length == 0) {
-        queue.openingTab = false;
-        return;
-      }
-      // Get number of opened tabs, whitelisted and pinned excluded
-      var tabCount = 0;
-      for (var i = 0; i < windowTabs.length; i++) {
-        if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
-          tabCount++;
+  var freeSpace = tabLimit - tabCount;
+  itemsToOpen = freeSpace;
+  // Free space and items waiting
+  if (freeSpace > 0 && currentQueue.length > 0) {
+    if (!isQueuing) {
+      //openNextItem(windowId); // Open items one by one recursively
+      // Create as many tabs as possible
+      // First create the tabs, then remove the items from queue
+      // after ALL new tabs have been created
+      var j = 0;
+      while (freeSpace > 0 && j < currentQueue.length) {
+        if (!currentQueue[j].locked) {
+          chrome.tabs.create({
+            "windowId": wdw.id,
+            "url": currentQueue[j].url,
+            "active": false
+          });
+          removeItem(wdw.id, j);
+          freeSpace--;
+        }
+        else {
+          j++;
         }
       }
-      var freeSpace = tabLimit - tabCount;
-      // Free space, open tab
-      if (freeSpace > 0) {
-        // Look for unlocked item to load
-        for (var i = 0; i < queue.items.length; i++) {
-          if (!queue.items[0].locked) {
-            // Open in tab and remove from queue
-            chrome.tabs.create({
-              "windowId": windowId,
-              "url": queue.items[i].url,
-              "active": false
-            });
-            removeItem(queue.window, i);
-            break;
-          }
-        }
-      }
-      queue.openingTab = false;
-    });
+    }
   }
-}*/
+  // Reset for the next one
+  isQueuing = false;
+}
 
 /**
  * Open new window with associated queue
