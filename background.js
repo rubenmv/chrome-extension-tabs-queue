@@ -194,12 +194,12 @@ function init() {
     if (data.hasOwnProperty('queues')) {
       queues = JSON.parse(data.queues);
     }
+    initQueues();
+    setUpdater();
     // Restore queues on start?
     if (data.hasOwnProperty('restoreOnStart') && data.restoreOnStart) {
       restoreSavedQueues();
     }
-    initQueues();
-    setUpdater();
   }
   // Get the options from sync storage
   chrome.storage.local.get(null, optionsDataRetrieved);
@@ -247,9 +247,11 @@ function setUpdater() {
       return;
     }
     // Get all windows info
-    chrome.windows.getAll({ "populate": true, "windowTypes": ["normal"] }, function (windows) {
+    chrome.windows.getAll({ "populate": true }, function (windows) {
       for (var i = 0; i < windows.length; i++) {
-        checkOpenNextItems(windows[i]);
+        if (windows[i].type === "normal") {
+          checkOpenNextItems(windows[i]);
+        }
       }
     });
     updateBadgeCounter();
@@ -537,7 +539,13 @@ function queueTab(tabState) {
     // Save to queue and local storage
     saveItem(item);
     isQueuing = true;
-    chrome.tabs.remove(tabState.id);
+    chrome.tabs.remove(tabState.id, function () {
+      if (chrome.runtime.lastError !== undefined) {
+        //console.error("An error ocurred removing tab: " + chrome.runtime.lastError.string);
+        //console.error(chrome.runtime.lastError);
+        return;
+      }
+    });
   }
 }
 

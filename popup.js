@@ -93,7 +93,9 @@ function onSwitchChanged(e) {
 function deleteItem(e) {
   var liElement = e.target.parentNode;
   liElement.parentNode.removeChild(liElement);
-  bgPage.removeItem(liElement.value); // index
+  console.log("Removing item: " + liElement.value);
+  console.log("typeof: " + typeof(liElement.value));
+  bgPage.removeItem(queueId, liElement.value); // index
 }
 
 /**
