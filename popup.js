@@ -12,30 +12,52 @@ function openItemInCurrentTab(evt) {
   if (evt.target.className !== "item-url") {
     return;
   }
-  // Update current tab url
-  chrome.tabs.update({
-    url: evt.target.textContent
-  });
+  
+  // ctrl, command (OSX), middle mouse
+  var newTab = false;
+  console.log("Item clicked: " + evt.button);
+  if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
+    newTab = true;
+  }
+  // Open url, override limit, replace current tab
+  bgPage.openUrlInTab(queueId, evt.target.textContent, newTab, !newTab);
+  
   // Remove element from queue and storage, only if not locked
   // value (int) was added on getBackgroundInfo() when creating li elements
-  var parent = evt.target.parentNode;
-  var lock = parent.getElementsByClassName("item-lock")[0];
-  if (lock && lock.getAttribute("data-checked") === "false") {
-    bgPage.removeItem(queueId, parent.value); // window/queue, tab index
+  var liElement = evt.target.parentNode;
+  var itemLock = liElement.getElementsByClassName("item-lock")[0];
+  if (itemLock && itemLock.getAttribute("data-checked") === "false") {
+    //liElement.parentNode.removeChild(liElement); // Remove li element
+    reIndex(liElement, liElement.value, -1); // Reindex list (-1 to remove item)
   }
-  window.close();
 }
 
 /**
- * Update index/value attribute on list items and update queue
+ * Remove item
  */
-function reindex(oldPos, newPos) {
-  var items = document.getElementById("url-list").getElementsByClassName("list-item");
+function deleteItem(evt) {
+  var liElement = evt.target.parentNode;
+  reIndex(liElement, liElement.value, -1);
+}
+
+/**
+ * Updates/removes index/value attribute on list items and update queue
+ */
+function reIndex(element, oldPos, newPos) {
+  var list = document.getElementById("url-list");
+  // Just remove item
+  if (newPos === -1) {
+    bgPage.removeItem(queueId, element.value); // window/queue, tab index
+    list.removeChild(element);
+  }
+  else { // Move in queue
+    bgPage.moveItemInQueue(queueId, oldPos, newPos);
+  }
+  // Reindex list
+  var items = list.getElementsByClassName("list-item");
   for (var i = 0; i < items.length; i++) {
     items[i].value = i;
   }
-  // queue id, old positio, new position
-  bgPage.moveItemInQueue(queueId, oldPos, newPos);
 }
 
 /**
@@ -85,17 +107,6 @@ function onClearAll() {
  */
 function onSwitchChanged(e) {
   bgPage.setActive(e.target.checked);
-}
-
-/**
- * Remove item
- */
-function deleteItem(e) {
-  var liElement = e.target.parentNode;
-  liElement.parentNode.removeChild(liElement);
-  console.log("Removing item: " + liElement.value);
-  console.log("typeof: " + typeof(liElement.value));
-  bgPage.removeItem(queueId, liElement.value); // index
 }
 
 /**
@@ -156,7 +167,7 @@ function getBackgroundInfo() {
         animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
         handle: ".handle", // Restricts sort start click/touch to the specified element
         onEnd: function (evt) {
-          reindex(evt.oldIndex, evt.newIndex);
+          reIndex(null, evt.oldIndex, evt.newIndex);
         }
       });
       info.textContent = "Queue in this window";

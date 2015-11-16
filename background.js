@@ -9,11 +9,12 @@ var
   // When a new tab is queued, it is instantly closed
   // this flag alerts not to open a new tab when this happens (onRemovedTab)
   isQueuing = false,
+  isOverriding = false, // Next tab to open will override tab limit 
   storing = false, // To check if currently there's a store operation waiting to finish
   updater = null, // Saves interval function
   itemsToOpen = 0, // indicates if openNextItem() should be called again
   // Tabs waiting for url update (before queuing)
-  tabsWaitingArray = [],
+  tabsWaiting = [],
   tabLimit = 10,
   allowDuplicates = false,
   queues = []; // Array of queued items
@@ -282,30 +283,49 @@ function checkOpenNextItems(wdw) {
   itemsToOpen = freeSpace;
   // Free space and items waiting
   if (freeSpace > 0 && currentQueue.length > 0) {
-    if (!isQueuing) {
-      //openNextItem(windowId); // Open items one by one recursively
-      // Create as many tabs as possible
-      // First create the tabs, then remove the items from queue
-      // after ALL new tabs have been created
-      var j = 0;
-      while (freeSpace > 0 && j < currentQueue.length) {
-        if (!currentQueue[j].locked) {
-          chrome.tabs.create({
-            "windowId": wdw.id,
-            "url": currentQueue[j].url,
-            "active": false
-          });
-          removeItem(wdw.id, j);
-          freeSpace--;
-        }
-        else {
-          j++;
-        }
+    //openNextItem(windowId); // Open items one by one recursively
+    // Create as many tabs as possible
+    // First create the tabs, then remove the items from queue
+    // after ALL new tabs have been created
+    var j = 0;
+    while (freeSpace > 0 && j < currentQueue.length) {
+      if (!currentQueue[j].locked) {
+        chrome.tabs.create({
+          "windowId": wdw.id,
+          "url": currentQueue[j].url,
+          "active": false
+        });
+        removeItem(wdw.id, j);
+        freeSpace--;
+      }
+      else {
+        j++;
       }
     }
   }
-  // Reset for the next one
-  isQueuing = false;
+}
+
+/**
+ * Opens a new tab with an url.
+ * override = the tab goes into the override limit list
+ * replaceCurrent = instead of new tab, replace/load in current
+ */
+function openUrlInTab(windowId, url, override, replaceCurrent) {
+  isOverriding = override;
+  // If loads in current, no need to override limit
+  if (replaceCurrent) {
+    chrome.tabs.update({
+      "url": url
+    });
+  }
+  // Create new tab
+  else {
+    chrome.tabs.create({
+      "windowId": windowId,
+      "url": url,
+      "active": false
+    });
+  }
 }
 
 /**
@@ -435,10 +455,12 @@ function setLock(queueId, index, value) {
 /**
  * Check if tab is on the wait list (new) and remove it
  */
-function findRemoveTabWaiting(tabId) {
-  for (var i = 0; i < tabsWaitingArray.length; i++) {
-    if (tabId === tabsWaitingArray[i].id) {
-      tabsWaitingArray.splice(i, 1);
+function findTabWaiting(tabId, remove) {
+  for (var i = 0; i < tabsWaiting.length; i++) {
+    if (tabId === tabsWaiting[i].id) {
+      if (remove) {
+        tabsWaiting.splice(i, 1);
+      }
       return true;
     }
   }
@@ -486,7 +508,12 @@ function onCreatedTab(newTab) {
   if (!isActive) {
     return;
   }
-  tabsWaitingArray.push(newTab);
+  // If the tab is overriding the limit, don't
+  // push it into the waiting list
+  if (!isOverriding) {
+    tabsWaiting.push(newTab);
+  }
+  isOverriding = false; // Reset override for the next one
 }
 /**
  * New tab created, check limit and add to queue
@@ -503,8 +530,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
     return;
   }
   //First check if the updated tab is one of the new ones
-  //or if it's pinned
-  if (!findRemoveTabWaiting(tabId)) {
+  if (!findTabWaiting(tabId, true)) {
     return;
   }
   // Get tabs in updated tab window
@@ -574,8 +600,6 @@ function onWindowRemoved(id) {
     }
   }
 }
-
-
 
 // LISTENERS
 document.addEventListener('DOMContentLoaded', init);
