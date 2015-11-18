@@ -1,8 +1,33 @@
 /*global chrome, FileReader, window, document, console, Sortable*/
 "use strict";
 
-var bgPage = chrome.extension.getBackgroundPage(),
+var
+  bgPage = chrome.extension.getBackgroundPage(),
   queueId = null;
+
+/*****************************************
+ * QUEUE OPERATIONS
+ */  
+  
+/**
+* Updates/removes index/value attribute on list items and update queue
+*/
+function reIndex(element, oldPos, newPos) {
+  var list = document.getElementById("url-list");
+  // Just remove item
+  if (newPos === -1) {
+    bgPage.removeItem(queueId, element.value); // window/queue, tab index
+    list.removeChild(element);
+  }
+  else { // Move in queue
+    bgPage.moveItemInQueue(queueId, oldPos, newPos);
+  }
+  // Reindex list
+  var items = list.getElementsByClassName("list-item");
+  for (var i = 0; i < items.length; i++) {
+    items[i].value = i;
+  }
+}
 
 /**
  * Opens clicked item on current tab
@@ -41,24 +66,43 @@ function deleteItem(evt) {
 }
 
 /**
- * Updates/removes index/value attribute on list items and update queue
- */
-function reIndex(element, oldPos, newPos) {
-  var list = document.getElementById("url-list");
-  // Just remove item
-  if (newPos === -1) {
-    bgPage.removeItem(queueId, element.value); // window/queue, tab index
-    list.removeChild(element);
-  }
-  else { // Move in queue
-    bgPage.moveItemInQueue(queueId, oldPos, newPos);
-  }
-  // Reindex list
-  var items = list.getElementsByClassName("list-item");
-  for (var i = 0; i < items.length; i++) {
-    items[i].value = i;
-  }
+ * Clear all items in current queue
+*/
+function onClearAll() {
+  bgPage.clearItems(queueId);
+  window.close();
 }
+
+/**
+ * Toggle active state
+ */
+function onSwitchChanged(e) {
+  bgPage.setActive(e.target.checked);
+}
+
+/**
+ * Restore all saved windows
+ */
+function onRestore() {
+  bgPage.restoreSavedQueues();
+  window.close();
+}
+
+/**
+ * Manages clicks on saved queues list
+ */
+function onSavedListClick(evt) {
+  evt.stopPropagation();
+  if (evt.target.className !== "btn") {
+    return;
+  }
+  bgPage.restoreQueue(evt.target.getAttribute("data-queue"));
+  window.close();
+}
+
+/****************************************************
+ * HTML AND PRESENTATION
+ */
 
 /**
  * Show/hide remove button on queue item
@@ -92,21 +136,6 @@ function toggleLock(e) {
   var image = state ? "images/lock-enabled.png" : "images/lock-disabled.png";
   e.target.setAttribute("src", image);
   bgPage.setLock(queueId, liElement.value, state);
-}
-
-/**
- * Clear all items in current queue
-*/
-function onClearAll() {
-  bgPage.clearItems(queueId);
-  window.close();
-}
-
-/**
- * Toggle active state
- */
-function onSwitchChanged(e) {
-  bgPage.setActive(e.target.checked);
 }
 
 /**
@@ -149,7 +178,6 @@ function createItem(index, url, locked) {
 
   return liElement;
 }
-
 
 /**
  * Gets data from background page
@@ -199,27 +227,7 @@ function getBackgroundInfo() {
 }
 
 /**
- * Restore all saved windows
- */
-function onRestore() {
-  bgPage.restoreSavedQueues();
-  window.close();
-}
-
-/**
- * Manages clicks on saved queues list
- */
-function onSavedListClick(evt) {
-  evt.stopPropagation();
-  if (evt.target.className !== "btn") {
-    return;
-  }
-  bgPage.restoreQueue(evt.target.getAttribute("data-queue"));
-  window.close();
-}
-
-/**
- * 
+ * Displays a list of saved queues
  */
 function loadSavedQueues() {
   var

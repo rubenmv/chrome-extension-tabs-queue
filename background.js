@@ -23,8 +23,12 @@ var
 var ICON_DEFAULT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC';
 var ICON_DISABLED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=';
 
+/*********************************************
+ * CLASSES
+ */
+
 /**
- * Queue class
+ * Queue
  */
 function Queue(windowId) {
   this.window = windowId,
@@ -33,7 +37,7 @@ function Queue(windowId) {
 }
 
 /**
- * Item class. Contains info about the tab saved in queue.
+ * Item. Contains info about the tab saved in queue.
  */
 function Item(id, windowId, url, state, locked) {
   this.id = id,
@@ -43,7 +47,24 @@ function Item(id, windowId, url, state, locked) {
   this.locked = locked;
 }
 
-// Adds move function to Array. Moves an item from one position to another
+/**
+ * Changes the lock state an item in the current/active queue
+ */
+function setLock(queueId, index, value) {
+  var currentQueue = getQueue(queueId).items;
+  if (currentQueue.length > 0) {
+    currentQueue[index].locked = value;
+    cleanAndStore();
+  }
+}
+
+/*********************************************
+ * QUEUE AND ITEM METHODS
+ */
+
+/**
+ * Extend Array object to include move method
+ */
 Array.prototype.move = function (oldIndex, newIndex) {
   while (oldIndex < 0) {
     oldIndex += this.length;
@@ -61,39 +82,6 @@ Array.prototype.move = function (oldIndex, newIndex) {
   return this; // for testing purposes
 };
 
-
-/**
- * Save queues state to local storage
- */
-function cleanAndStore() {
-  if (!storing) {
-    storing = true;
-    var timer = window.setTimeout(function () {
-      // cleanup
-      var i = 0;
-      while (i < queues.length) {
-        // Remove empty queues
-        if (queues[i].items.length === 0) {
-          queues.splice(i, 1);
-        }
-        else {
-          i++;
-        }
-      }
-      // storage works only with strings
-      var jsonQueues = JSON.stringify(queues);
-      chrome.storage.local.set({ 'queues': jsonQueues }, function () {
-        if (chrome.runtime.lastError !== undefined) {
-          console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
-          console.error(chrome.runtime.lastError);
-        }
-      });
-      window.clearTimeout(timer);
-      storing = false;
-    }, 2000);
-  }
-}
-
 /**
  * Moves item position from specific queue
  */
@@ -102,6 +90,121 @@ function moveItemInQueue(queueId, oldPos, newPos) {
   queue.move(oldPos, newPos);
   cleanAndStore();
 }
+
+/**
+ * Returns the queue of a window. Creates one if it doesn't exists.
+ */
+function getQueue(windowId) {
+  for (var i = 0; i < queues.length; i++) {
+    if (queues[i].window == windowId) {
+      return queues[i];
+    }
+  }
+  // Not found: creates new queue
+  var newQueue = new Queue(windowId);
+  queues.push(newQueue);
+  return newQueue;
+}
+
+/**
+ * Check if tab is on the wait list (new) and remove it
+ */
+function findTabWaiting(tabId, remove) {
+  for (var i = 0; i < tabsWaiting.length; i++) {
+    if (tabId === tabsWaiting[i].id) {
+      if (remove) {
+        tabsWaiting.splice(i, 1);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+/**
+ * Check if url is in queue. Returns index, -1 if not found
+ */
+function findInQueue(qu, url) {
+  //var currentQueue = getQueue(queue).items;
+  for (var i = 0; i < qu.length; i++) {
+    if (qu[i].url === url) {
+      return i;
+    }
+  }
+  return -1;
+}
+/**
+ * Check if the url matches something in whitelist
+ */
+function isInWhitelist(url) {
+  for (var i = 0; i < whitelist.length; i++) {
+    if (whitelist[i].test(url)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Removes all items in queue
+ */
+function clearItems(queueId) {
+  var currentQueue = getQueue(queueId);
+  currentQueue.items = [];
+  cleanAndStore();
+}
+
+/**
+ * Close tab and add it to queue
+ */
+function queueTab(tabState) {
+  if (!isInWhitelist(tabState.url)) {
+    // Create item
+    var item = new Item(tabState.id, tabState.windowId, tabState.url, tabState.status, false);
+    // Save to queue and local storage
+    saveItem(item);
+    isQueuing = true;
+    chrome.tabs.remove(tabState.id, function () {
+      if (chrome.runtime.lastError !== undefined) {
+        //console.error("An error ocurred removing tab: " + chrome.runtime.lastError.string);
+        //console.error(chrome.runtime.lastError);
+        return;
+      }
+    });
+  }
+}
+
+/**
+ * Push new url to queue and save it in local storage
+ */
+function saveItem(item) {
+  var qu = getQueue(item.window).items;
+  if (!allowDuplicates) {
+    // If duplicate, don't push and move it to top
+    var p = findInQueue(qu, item.url);
+    if (p >= 0) {
+      qu.move(p, 0); // Move to top
+      return;
+    }
+  }
+  // Push to queue
+  qu.push(item);
+  // Update local storage and badge
+  cleanAndStore();
+}
+
+/**
+ * Removes item from queue and storage
+ */
+function removeItem(queueId, index) {
+  var itemQueue = getQueue(queueId).items;
+  // Remove from queue
+  itemQueue.splice(index, 1);
+  cleanAndStore();
+}
+
+/***********************************************************
+ * GENERAL
+ */
 
 /**
  * Change active state and browser action icon
@@ -126,20 +229,6 @@ function setActive(active) {
   //onRemovedTab();
 }
 
-/**
- * Returns the queue of a window. Creates one if it doesn't exists.
- */
-function getQueue(windowId) {
-  for (var i = 0; i < queues.length; i++) {
-    if (queues[i].window == windowId) {
-      return queues[i];
-    }
-  }
-  // Not found: creates new queue
-  var newQueue = new Queue(windowId);
-  queues.push(newQueue);
-  return newQueue;
-}
 
 /**
  * Updates counter in browser action icon/button
@@ -207,40 +296,24 @@ function init() {
 }
 
 /**
- * Opens x number of items in queue one by one
+ * Resets queues ids
  */
-/*function openNextItem(queueId) {
-  var currentQueue = getQueue(queueId);
-  if (currentQueue.items.length === 0) {
+function initQueues() {
+  if (queues.length === 0) {
     return;
   }
-  var i = 0;
-  while(i < currentQueue.items.length && currentQueue.items[i].locked) {
-    i++;
+  // First cleanup all reference to window ids to prevent mixup
+  for (var i = 0; i < queues.length; i++) {
+    var q = queues[i];
+    q.window = DEFAULT_ID;
+    for (var j = 0; j < q.items.length; j++) {
+      q.items[j].window = DEFAULT_ID;
+    }
   }
-  chrome.tabs.create({
-    "windowId": queueId,
-    "url": currentQueue.items[i].url, // First item
-    "active": false
-  }, function () {
-    if (chrome.runtime.lastError !== undefined) {
-      console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
-      console.error(chrome.runtime.lastError);
-    }
-    else {
-      // Delete item and check for next
-      itemsToOpen--;
-      removeItem(queueId, 0);
-      if (itemsToOpen > 0) {
-        openNextItem(queueId); // Recursive callback
-      }
-    }
-    return;
-  });
-}*/
+}
 
 /**
- * Check tabs every 2 seconds and update badge counter
+ * Check tabs every x seconds and update badge counter
  */
 function setUpdater() {
   updater = window.setInterval(function () {
@@ -339,44 +412,18 @@ function openQueueInWindow(queue) {
     for (var j = 0; j < items.length; j++) {
       items[j].window = windowInfo.id;
     }
-    // Open items in queue to fill limit
-    //checkOpenNextItems(windowInfo.id);
   });
 }
 
 /**
- * Resets queues ids
+ * Restore a queue given a position in the list
  */
-function initQueues() {
-  if (queues.length === 0) {
-    return;
-  }
-  // First cleanup all reference to window ids to prevent mixup
-  for (var i = 0; i < queues.length; i++) {
-    var q = queues[i];
-    q.window = DEFAULT_ID;
-    for (var j = 0; j < q.items.length; j++) {
-      q.items[j].window = DEFAULT_ID;
-    }
-  }
+function restoreQueue(position) {
+  openQueueInWindow(queues[position]);
 }
 
 /**
- * Opens a new window per queue and updates their ids
- */
-/*function restoreAllQueues() {
-  if (queues.length === 0) {
-    return;
-  }
-  // Need to do it this way because the callback from windows.create
-  // gets called after the for loop has finished and 'i' is wrong value 
-  for (var i = 0; i < queues.length; i++) {
-    openQueueInWindow(queues[i]);
-  }
-}*/
-
-/**
- * Open all saved queues in new windows
+ * Open all saved queues into new windows
  */
 function restoreSavedQueues() {
   for (var i = 0; i < queues.length; i++) {
@@ -386,12 +433,13 @@ function restoreSavedQueues() {
   }
 }
 
-/**
- * Restore a queue given a position in the list
+/**********************************************
+ * STORAGE
  */
-function restoreQueue(position) {
-  openQueueInWindow(queues[position]);
-}
+
+/**
+ * Save queues state to local storage
+ */
 
 /**
  * Settings changes
@@ -411,94 +459,39 @@ function onSettingsChanged(changes, namespace) {
     }
   }
 }
-/**
- * Push new url to queue and save it in local storage
- */
-function saveItem(item) {
-  var qu = getQueue(item.window).items;
-  if (!allowDuplicates) {
-    // If duplicate, don't push and move it to top
-    var p = findInQueue(qu, item.url);
-    if (p >= 0) {
-      qu.move(p, 0); // Move to top
-      return;
-    }
-  }
-  // Push to queue
-  qu.push(item);
-  // Update local storage and badge
-  cleanAndStore();
-}
 
-/**
- * Removes item from queue and storage
- */
-function removeItem(queueId, index) {
-  var itemQueue = getQueue(queueId).items;
-  // Remove from queue
-  itemQueue.splice(index, 1);
-  cleanAndStore();
-  //updateBadgeCounter();
-}
-
-/**
- * Changes the lock state an item in the current/active queue
- */
-function setLock(queueId, index, value) {
-  var currentQueue = getQueue(queueId).items;
-  if (currentQueue.length > 0) {
-    currentQueue[index].locked = value;
-    cleanAndStore();
-  }
-}
-
-/**
- * Check if tab is on the wait list (new) and remove it
- */
-function findTabWaiting(tabId, remove) {
-  for (var i = 0; i < tabsWaiting.length; i++) {
-    if (tabId === tabsWaiting[i].id) {
-      if (remove) {
-        tabsWaiting.splice(i, 1);
+function cleanAndStore() {
+  if (!storing) {
+    storing = true;
+    var timer = window.setTimeout(function () {
+      // cleanup
+      var i = 0;
+      while (i < queues.length) {
+        // Remove empty queues
+        if (queues[i].items.length === 0) {
+          queues.splice(i, 1);
+        }
+        else {
+          i++;
+        }
       }
-      return true;
-    }
+      // storage works only with strings
+      var jsonQueues = JSON.stringify(queues);
+      chrome.storage.local.set({ 'queues': jsonQueues }, function () {
+        if (chrome.runtime.lastError !== undefined) {
+          console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
+          console.error(chrome.runtime.lastError);
+        }
+      });
+      window.clearTimeout(timer);
+      storing = false;
+    }, 2000);
   }
-  return false;
-}
-/**
- * Check if url is in queue. Returns index, -1 if not found
- */
-function findInQueue(qu, url) {
-  //var currentQueue = getQueue(queue).items;
-  for (var i = 0; i < qu.length; i++) {
-    if (qu[i].url === url) {
-      return i;
-    }
-  }
-  return -1;
-}
-/**
- * Check if the url matches something in whitelist
- */
-function isInWhitelist(url) {
-  for (var i = 0; i < whitelist.length; i++) {
-    if (whitelist[i].test(url)) {
-      return true;
-    }
-  }
-  return false;
 }
 
-/**
- * Removes all items in queue
+/********************************************
+ * EVENTS
  */
-function clearItems(queueId) {
-  var currentQueue = getQueue(queueId);
-  currentQueue.items = [];
-  cleanAndStore();
-  //updateBadgeCounter();
-}
 
 /**
  * Simply save the new tab id and check later when url gets updated
@@ -519,18 +512,8 @@ function onCreatedTab(newTab) {
  * New tab created, check limit and add to queue
  */
 function onUpdatedTab(tabId, tabInfo, tabState) {
-  if (!isActive) {
-    return;
-  }
-  //Pinned tab = removed tab
-  if (tabInfo.pinned) {
-    // Trigger opening next in queue
-    //checkOpenNextItems(tabState.windowId);
-    //onRemovedTab(tabId, removeInfo);
-    return;
-  }
   //First check if the updated tab is one of the new ones
-  if (!findTabWaiting(tabId, true)) {
+  if (!isActive || tabInfo.pinned || !findTabWaiting(tabId, true)) {
     return;
   }
   // Get tabs in updated tab window
@@ -556,39 +539,6 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
 }
 
 /**
- * Close tab and add it to queue
- */
-function queueTab(tabState) {
-  if (!isInWhitelist(tabState.url)) {
-    // Create item
-    var item = new Item(tabState.id, tabState.windowId, tabState.url, tabState.status, false);
-    // Save to queue and local storage
-    saveItem(item);
-    isQueuing = true;
-    chrome.tabs.remove(tabState.id, function () {
-      if (chrome.runtime.lastError !== undefined) {
-        //console.error("An error ocurred removing tab: " + chrome.runtime.lastError.string);
-        //console.error(chrome.runtime.lastError);
-        return;
-      }
-    });
-  }
-}
-
-/**
- * Tab removed, check if there's something in the queue
- */
-/*function onRemovedTab(tabId, removeInfo) {
-  if (!isActive) {
-    return;
-  }
-  var queue = getQueue(removeInfo.windowId);
-  // Try to open new tab or wait
-  //checkOpenNextItems(removeInfo.windowId);
-  openItem(removeInfo.windowId);
-}*/
-
-/**
  * Check related queue and reset its id
  */
 function onWindowRemoved(id) {
@@ -605,7 +555,5 @@ function onWindowRemoved(id) {
 document.addEventListener('DOMContentLoaded', init);
 chrome.storage.onChanged.addListener(onSettingsChanged);
 chrome.tabs.onCreated.addListener(onCreatedTab);
-//chrome.tabs.onRemoved.addListener(onRemovedTab);
 chrome.tabs.onUpdated.addListener(onUpdatedTab);
-//chrome.tabs.onActivated.addListener(updateBadgeCounter);
 chrome.windows.onRemoved.addListener(onWindowRemoved);
