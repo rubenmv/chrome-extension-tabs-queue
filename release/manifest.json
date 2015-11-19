@@ -6,7 +6,11 @@
   "description": "Opened tabs limiter with queue.",
   "version": "1.1.2",
 
-  "permissions": ["tabs", "contextMenus", "storage"],
+  "permissions": [
+    "tabs",
+    "contextMenus",
+    "storage"
+  ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
 
   "browser_action": {
@@ -22,7 +26,9 @@
     "24": "images/default-24.png"
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   },
   "options_page": "options.html"
 }

@@ -18,6 +18,9 @@ $RECYCLE.BIN/
 *.sublime-project
 *.sublime-workspace
 
+# Node
+node_modules
+
 # =========================
 # Operating System Files
 # =========================
