@@ -134,6 +134,11 @@ a {
   margin-right: 0.5em;
   cursor: pointer;
 }
-#clearConfirm {
-  font-size: 0.8em;
+.dialog-clear {
+  position: absolute;
+  z-index: 100;
+  width: 48%;
+  right: 20px;
+  padding: 0;
+  background-color: #fff;
 }

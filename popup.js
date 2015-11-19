@@ -65,10 +65,19 @@ function deleteItem(evt) {
   reIndex(liElement, liElement.value, -1);
 }
 
+
+/**
+ * Clear all queues
+*/
+function onClearQueues() {
+  bgPage.clearQueues();
+  window.close();
+}
+
 /**
  * Clear all items in current queue
 */
-function onClearAll() {
+function onClearItems() {
   bgPage.clearItems(queueId);
   window.close();
 }
@@ -113,14 +122,40 @@ function toggleRemoveButton(evt) {
 }
 
 /**
- * Ask for confirmation and calls clear all items
+ * Ask for confirmation and calls clear all
  */
-function toggleClearConfirm() {
-  var clearButton = document.getElementById("button-clear");
-  var confirmDialog = document.getElementById("clearConfirm");
+function toggleClearConfirm(evt) {
+  // Get confirm dialog associated
+  var dialog = document.querySelectorAll('[data-for="' + evt.target.getAttribute("id") + '"]')[0];
+  if (!dialog) {
+    return;
+  }
+  //evt.target.style.display = evt.target.style.display !== "none" ? "none" : "inline-block";
+  evt.target.style.visibility = evt.target.style.visibility !== "hidden" ? "hidden" : "visible";
+  dialog.style.display = dialog.style.display !== "none" ? "none" : "inline-block";
+}
 
-  clearButton.style.display = clearButton.style.display !== "none" ? "none" : "inline-block";
-  confirmDialog.style.display = confirmDialog.style.display !== "none" ? "none" : "inline-block";
+/**
+ * Process clear confirm dialog click
+ */
+function onConfirmDialogClick(evt) {
+  // Get associated control/button
+  // currentTarget (the one with eventListener) == parentNode in this case
+  var button = document.getElementById(evt.currentTarget.getAttribute("data-for"));
+  var event = { "target": button }; // fake event
+  // If no, just toggle dialog
+  if (evt.target.getAttribute("name") === "clearNo") {
+    toggleClearConfirm(event);
+  }
+  else if (evt.target.getAttribute("name") === "clearYes") {
+    // Run the corresponding action
+    if (button.id === "buttonClearItems") {
+      onClearItems();
+    }
+    else if (button.id === "buttonClearQueues") {
+      onClearQueues();
+    }
+  }
 }
 
 /**
@@ -186,7 +221,7 @@ function createItem(index, url, locked) {
 function getBackgroundInfo() {
   chrome.windows.getLastFocused(function (windowInfo) {
     queueId = windowInfo.id;
-    var info = document.getElementById("url-list-info"),
+    var itemsInfo = document.getElementById("urlListInfo"),
       urlList = document.getElementById("url-list"),
       urlArray = bgPage.getQueue(queueId).items;
     if (urlArray.length > 0) {
@@ -199,7 +234,7 @@ function getBackgroundInfo() {
           reIndex(null, evt.oldIndex, evt.newIndex);
         }
       });
-      info.textContent = "Queue in this window";
+      itemsInfo.textContent = "Queue in this window";
       for (var i = 0; i < urlArray.length; i++) { 
         // Append item to list
         urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));
@@ -207,7 +242,7 @@ function getBackgroundInfo() {
       urlList.addEventListener("click", openItemInCurrentTab);
     }
     else {
-      info.textContent = "Queue is empty";
+      itemsInfo.textContent = "Queue is empty";
     }
   });
 
@@ -217,13 +252,14 @@ function getBackgroundInfo() {
   // After init add the other listeners
   var switchButton = document.getElementById("myonoffswitch");
   switchButton.checked = bgPage.isActive;
-  document.getElementById("button-clear").addEventListener("click", toggleClearConfirm);
-  // Listener for clear confirm dialog
-  document.getElementById("clearYes").addEventListener("click", onClearAll);
-  document.getElementById("clearNo").addEventListener("click", toggleClearConfirm);
-  document.getElementById("clearConfirm").style.display = "none";
-  
-  //document.getElementById("button-queueall").addEventListener("click", bgPage.queueAllTabs);
+  document.getElementById("buttonClearQueues").addEventListener("click", toggleClearConfirm);
+  document.getElementById("buttonClearItems").addEventListener("click", toggleClearConfirm);
+  // Listeners for confirm dialogs and hide them
+  var dlgs = document.getElementsByClassName("dialog-clear");
+  for (var i = 0; i < dlgs.length; i++) {
+    dlgs[i].addEventListener("click", onConfirmDialogClick);
+    dlgs[i].style.display = "none";
+  }
   switchButton.addEventListener("change", onSwitchChanged);
 }
 
@@ -234,6 +270,7 @@ function loadSavedQueues() {
   var
     qus = bgPage.queues,
     list = document.getElementById("savedQueuesList"),
+    queuesInfo = document.getElementById("savedQueuesInfo"),
     savedCount = 0,
     li = null;
   for (var i = 0; i < qus.length; i++) {
@@ -261,7 +298,7 @@ function loadSavedQueues() {
   // Listen to clicks on list
   list.addEventListener("click", onSavedListClick);
   if (savedCount === 0) {
-    list.innerHTML = "<li>No saved queues</li>";
+    queuesInfo.textContent = "No saved queues";
   }
 }
 

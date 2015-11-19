@@ -1,6 +1,7 @@
 1.1.2 - 2015.11.16
 - Open queue items manually in new tab with ctrl+click o middle mouse button.
 - Items opened manually override the tab limit, so they won't get queued again.
+- Button to clear all queues.
 
 1.1.1 - 2015.11.15
 - Separate queues per window.

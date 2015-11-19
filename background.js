@@ -145,6 +145,14 @@ function isInWhitelist(url) {
 }
 
 /**
+ * Removes all queues
+ */
+function clearQueues() {
+  queues = [];
+  cleanAndStore();
+}
+
+/**
  * Removes all items in queue
  */
 function clearItems(queueId) {
@@ -440,11 +448,6 @@ function restoreSavedQueues() {
 /**********************************************
  * STORAGE
  */
-
-/**
- * Save queues state to local storage
- */
-
 /**
  * Settings changes
  */
@@ -506,7 +509,7 @@ function cleanAndStore() {
  */
 function createContextMenu() {
   chrome.contextMenus.create({
-    "title": "Open link in new tab (no limit)",
+    "title": "Open link in new tab (don't queue)",
     "contexts": ["link"],
     "onclick": onContextMenuLinkClicked
   });

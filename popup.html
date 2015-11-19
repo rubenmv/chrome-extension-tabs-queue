@@ -21,10 +21,16 @@
   <!--Saved queues-->
   <div class="caption">
     <div class="left">
-      <h2>Saved queues</h2>
+      <h2 id="savedQueuesInfo">Saved queues</h2>
     </div>
     <div class="right">
       <button id="buttonRestoreAll" class="btn">Restore all</button>
+      <button id="buttonClearQueues" class="btn">Clear all</button>
+      <div class="dialog-clear" data-for="buttonClearQueues">
+        <span>Are you sure?</span>
+        <button name="clearYes" class="btn">Yes</button>
+        <button name="clearNo" class="btn">No</button>
+      </div>
     </div>
   </div>
   <ul id="savedQueuesList">
@@ -33,15 +39,15 @@
   <!--Current queue-->
   <div class="caption">
     <div class="left">
-      <h2 id="url-list-info">Queue is empty</h2>
+      <h2 id="urlListInfo">Queue is empty</h2>
     </div>
     <div class="right">
-      <button id="button-clear" class="btn">Clear all</button>
+      <button id="buttonClearItems" class="btn">Clear all</button>
       <!--Hidden confirmation dialog-->
-      <div id="clearConfirm">
+      <div class="dialog-clear" data-for="buttonClearItems">
         <span>Are you sure?</span>
-        <button id="clearYes" class="btn">Yes</button>
-        <button id="clearNo" class="btn">No</button>
+        <button name="clearYes" class="btn">Yes</button>
+        <button name="clearNo" class="btn">No</button>
       </div>
     </div>
   </div>
