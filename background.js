@@ -145,6 +145,14 @@ function isInWhitelist(url) {
 }
 
 /**
+ * Delete queue
+ */
+function removeQueue(index) {
+  queues.splice(index, 1);
+  cleanAndStore();
+}
+
+/**
  * Removes all queues
  */
 function clearQueues() {
@@ -431,6 +439,9 @@ function openQueueInWindow(queue) {
  * Restore a queue given a position in the list
  */
 function restoreQueue(position) {
+  if(!position) {
+    return;
+  }
   openQueueInWindow(queues[position]);
 }
 

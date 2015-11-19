@@ -90,24 +90,6 @@ a {
   color: inherit;
   text-decoration: none;
 }
-.item-url {
-  display: inline-block;
-  width: 82%;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
-.item-remove {
-  display: none;
-  padding: 0.3em 0.7em;
-  cursor: pointer;
-}
-.item-remove:hover {
-  color: #fff;
-  background-color: #000;
-}
 .caption * {
   display: inline-block;
 }
@@ -118,6 +100,24 @@ a {
 .right {
   text-align: right;
   width: 48%;
+}
+.list-item-btn {
+  display: none;
+  padding: 0.3em 0.7em;
+  cursor: pointer;
+}
+.list-item-btn:hover {
+  color: #fff;
+  background-color: #000;
+}
+.item-url {
+  display: inline-block;
+  width: 82%;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
 }
 .handle {
   font-size: 2em;

@@ -30,43 +30,6 @@ function reIndex(element, oldPos, newPos) {
 }
 
 /**
- * Opens clicked item on current tab
- */
-function openItemInCurrentTab(evt) {
-  evt.stopPropagation();
-  evt.preventDefault();
-  if (evt.target.className !== "item-url") {
-    return;
-  }
-  
-  // ctrl, command (OSX), middle mouse
-  var newTab = false;
-  if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
-    newTab = true;
-  }
-  // Open url, override limit, replace current tab
-  bgPage.openUrlInTab(queueId, evt.target.textContent, newTab, !newTab);
-  
-  // Remove element from queue and storage, only if not locked
-  // value (int) was added on getBackgroundInfo() when creating li elements
-  var liElement = evt.target.parentNode;
-  var itemLock = liElement.getElementsByClassName("item-lock")[0];
-  if (itemLock && itemLock.getAttribute("data-checked") === "false") {
-    //liElement.parentNode.removeChild(liElement); // Remove li element
-    reIndex(liElement, liElement.value, -1); // Reindex list (-1 to remove item)
-  }
-}
-
-/**
- * Remove item
- */
-function deleteItem(evt) {
-  var liElement = evt.target.parentNode;
-  reIndex(liElement, liElement.value, -1);
-}
-
-
-/**
  * Clear all queues
 */
 function onClearQueues() {
@@ -98,27 +61,65 @@ function onRestore() {
 }
 
 /**
+ * Opens clicked item on current tab or delete item
+ */
+function onQueueListClick(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+  var liElement = evt.target.parentNode;
+  if (evt.target.className === "item-url") {
+    // ctrl, command (OSX), middle mouse
+    var newTab = false;
+    if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
+      newTab = true;
+    }
+    // Open url, override limit, replace current tab
+    bgPage.openUrlInTab(queueId, evt.target.textContent, newTab, !newTab);
+  
+    // Remove element from queue and storage, only if not locked
+    // value (int) was added on getBackgroundInfo() when creating li elements
+    
+    var itemLock = liElement.getElementsByClassName("item-lock")[0];
+    if (itemLock && itemLock.getAttribute("data-checked") === "false") {
+      reIndex(liElement, liElement.value, -1); // Reindex list (-1 to remove item)
+    }
+  }
+  else if (evt.target.className === "list-item-btn") {
+    if (evt.target.getAttribute("data-type") === "list-item-remove") {
+      reIndex(liElement, liElement.value, -1);
+    }
+  }
+}
+
+/**
  * Manages clicks on saved queues list
  */
 function onSavedListClick(evt) {
   evt.stopPropagation();
-  if (evt.target.className !== "btn") {
+  if (evt.target.className !== "list-item-btn") {
     return;
   }
-  bgPage.restoreQueue(evt.target.getAttribute("data-queue"));
+  var value = evt.target.parentNode.value;
+  if (evt.target.getAttribute("data-type") === "list-item-restore") {
+    bgPage.restoreQueue(value);
+  }
+  else if (evt.target.getAttribute("data-type") === "list-item-remove") {
+    bgPage.removeQueue(value);
+  }
   window.close();
 }
 
 /****************************************************
  * HTML AND PRESENTATION
  */
-
 /**
  * Show/hide remove button on queue item
  */
-function toggleRemoveButton(evt) {
-  var remove = evt.target.getElementsByClassName("item-remove")[0];
-  remove.style.display = remove.style.display === "none" ? "inline" : "none";
+function toggleListItemButton(evt) {
+  var btns = evt.target.getElementsByClassName("list-item-btn");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].style.display = (btns[i].style.display === "none" ? "inline" : "none");
+  }
 }
 
 /**
@@ -178,8 +179,8 @@ function toggleLock(evt) {
  */
 function createItem(index, url, locked) {
   // List element
-  var liElement = document.createElement("li");
-  liElement.setAttribute("class", "list-item");
+  var li = document.createElement("li");
+  li.setAttribute("class", "list-item");
   // Handle and link
   var handle = document.createElement("span");
   handle.setAttribute("class", "handle");
@@ -197,22 +198,70 @@ function createItem(index, url, locked) {
   urlSpan.textContent = url;
   // Remove button
   var remove = document.createElement("span");
-  remove.setAttribute("class", "item-remove");
-  remove.textContent = "x  ";
+  remove.setAttribute("class", "list-item-btn");
+  remove.setAttribute("data-type", "list-item-remove");
+  remove.textContent = "x";
   remove.style.display = "none";
-  remove.addEventListener("click", deleteItem);
   // Append in order
-  liElement.appendChild(handle);
-  liElement.appendChild(lock);
-  liElement.appendChild(lock);
-  liElement.appendChild(urlSpan);
-  liElement.appendChild(remove);
-  liElement.value = index; // To be able to remove it from the background page queue
+  li.appendChild(handle);
+  li.appendChild(lock);
+  li.appendChild(lock);
+  li.appendChild(urlSpan);
+  li.appendChild(remove);
+  li.value = index; // To be able to remove it from the background page queue
   // Add listeners to show/hide the remove item button
-  liElement.addEventListener("mouseenter", toggleRemoveButton);
-  liElement.addEventListener("mouseleave", toggleRemoveButton);
+  li.addEventListener("mouseenter", toggleListItemButton);
+  li.addEventListener("mouseleave", toggleListItemButton);
 
-  return liElement;
+  return li;
+}
+
+/**
+ * Displays a list of saved queues
+ */
+function loadSavedQueues() {
+  var
+    qus = bgPage.queues,
+    list = document.getElementById("savedQueuesList"),
+    queuesInfo = document.getElementById("savedQueuesInfo"),
+    savedCount = 0,
+    li = null;
+  for (var i = 0; i < qus.length; i++) {
+    if (qus[i].window === bgPage.DEFAULT_ID) {
+      savedCount++;
+      // LI element
+      li = document.createElement("li");
+      li.setAttribute("value", i);
+      // Title
+      var title = document.createElement("h3");
+      title.textContent = "Queue " + savedCount + " :: " + qus[i].items.length + " items";
+      title.setAttribute("class", "left");
+      var restore = document.createElement("span");
+      restore.setAttribute("class", "list-item-btn");
+      restore.setAttribute("data-type", "list-item-restore");
+      restore.textContent = "o";
+      restore.style.display = "none";
+      var remove = document.createElement("span");
+      remove.setAttribute("class", "list-item-btn");
+      remove.setAttribute("data-type", "list-item-remove");
+      remove.textContent = "x";
+      remove.style.display = "none";
+      // Append content
+      li.appendChild(title);
+      li.appendChild(restore);
+      li.appendChild(remove);
+      // Listeners
+      li.addEventListener("mouseenter", toggleListItemButton);
+      li.addEventListener("mouseleave", toggleListItemButton);
+
+      list.appendChild(li);
+    }
+  }
+  // Listen to clicks on list
+  list.addEventListener("click", onSavedListClick);
+  if (savedCount === 0) {
+    queuesInfo.textContent = "No saved queues";
+  }
 }
 
 /**
@@ -239,7 +288,7 @@ function getBackgroundInfo() {
         // Append item to list
         urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));
       }
-      urlList.addEventListener("click", openItemInCurrentTab);
+      urlList.addEventListener("click", onQueueListClick);
     }
     else {
       itemsInfo.textContent = "Queue is empty";
@@ -261,45 +310,6 @@ function getBackgroundInfo() {
     dlgs[i].style.display = "none";
   }
   switchButton.addEventListener("change", onSwitchChanged);
-}
-
-/**
- * Displays a list of saved queues
- */
-function loadSavedQueues() {
-  var
-    qus = bgPage.queues,
-    list = document.getElementById("savedQueuesList"),
-    queuesInfo = document.getElementById("savedQueuesInfo"),
-    savedCount = 0,
-    li = null;
-  for (var i = 0; i < qus.length; i++) {
-    if (qus[i].window === bgPage.DEFAULT_ID) {
-      savedCount++;
-      // LI element
-      li = document.createElement("li");
-      // Title
-      var title = document.createElement("h3");
-      title.textContent = "Queue " + savedCount + " --- " + qus[i].items.length + " items";
-      title.setAttribute("class", "left");
-      li.appendChild(title);
-      // Button element to restore queue
-      var button = document.createElement("button");
-      button.setAttribute("class", "btn");
-      button.setAttribute("data-queue", i); // Position in list (ID is -1 for all saved queues)
-      button.textContent = "Restore";
-      var span = document.createElement("span");
-      span.setAttribute("class", "right");
-      span.appendChild(button);
-      li.appendChild(span);
-      list.appendChild(li);
-    }
-  }
-  // Listen to clicks on list
-  list.addEventListener("click", onSavedListClick);
-  if (savedCount === 0) {
-    queuesInfo.textContent = "No saved queues";
-  }
 }
 
 document.addEventListener("DOMContentLoaded", getBackgroundInfo);
