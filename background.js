@@ -10,7 +10,7 @@ var
   // this flag alerts not to open a new tab when this happens (onRemovedTab)
   isQueuing = false,
   isOverriding = false, // Next tab to open will override tab limit 
-  storing = false, // To check if currently there's a store operation waiting to finish
+  storing = false, // To check if currently there"s a store operation waiting to finish
   updater = null, // Saves interval function
   itemsToOpen = 0, // indicates if openNextItem() should be called again
   // Tabs waiting for url update (before queuing)
@@ -20,8 +20,8 @@ var
   queues = []; // Array of queued items
 
 // Regular expressions for url exclusions
-var ICON_DEFAULT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC';
-var ICON_DISABLED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=';
+var ICON_DEFAULT = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC";
+var ICON_DISABLED = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=";
 
 /*********************************************
  * CLASSES
@@ -92,7 +92,7 @@ function moveItemInQueue(queueId, oldPos, newPos) {
 }
 
 /**
- * Returns the queue of a window. Creates one if it doesn't exists.
+ * Returns the queue of a window. Creates one if it doesn"t exists.
  */
 function getQueue(windowId) {
   for (var i = 0; i < queues.length; i++) {
@@ -179,7 +179,7 @@ function queueTab(tabState) {
 function saveItem(item) {
   var qu = getQueue(item.window).items;
   if (!allowDuplicates) {
-    // If duplicate, don't push and move it to top
+    // If duplicate, don"t push and move it to top
     var p = findInQueue(qu, item.url);
     if (p >= 0) {
       qu.move(p, 0); // Move to top
@@ -212,7 +212,7 @@ function removeItem(queueId, index) {
 function setActive(active) {
   isActive = active;
   // Save to storage
-  chrome.storage.local.set({ 'isActive': isActive });
+  chrome.storage.local.set({ "isActive": isActive });
   // Change icon
   var icon = isActive ? ICON_DEFAULT : ICON_DISABLED;
   
@@ -240,10 +240,10 @@ function updateBadgeCounter() {
     if (!currentTab) {
       return;
     }
-    var badgeColor = '#00ff00';
+    var badgeColor = "#00ff00";
     var currentQueue = getQueue(currentTab.windowId).items;
     if (currentQueue.length > 0) {
-      badgeColor = '#ff0000';
+      badgeColor = "#ff0000";
     }
     chrome.browserAction.setBadgeBackgroundColor({
       "color": badgeColor,
@@ -259,36 +259,40 @@ function updateBadgeCounter() {
  * Initialize settings and load queues
  */
 function init() {
-  document.removeEventListener('DOMContentLoaded');
+  document.removeEventListener("DOMContentLoaded");
   //sync.get callback, data received
   function optionsDataRetrieved(data) {
     // Check for error
     if (chrome.runtime.lastError !== undefined) {
-      console.error('An error ocurred initializing options: ' + chrome.runtime.lastError.string);
+      console.error("An error ocurred initializing options: " + chrome.runtime.lastError.string);
       return;
     }
     // Initialize properties
-    if (data.hasOwnProperty('tabLimit')) {
+    if (data.hasOwnProperty("tabLimit")) {
       tabLimit = data.tabLimit;
     }
-    if (data.hasOwnProperty('allowDuplicates')) {
+    if (data.hasOwnProperty("allowDuplicates")) {
       allowDuplicates = data.allowDuplicates;
     }
-    if (data.hasOwnProperty('isActive')) {
+    if (data.hasOwnProperty("isActive")) {
       isActive = data.isActive;
     }
     var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
     chrome.browserAction.setIcon({
       "path": iconPath
     });
-    if (data.hasOwnProperty('queues')) {
+    if (data.hasOwnProperty("queues")) {
       queues = JSON.parse(data.queues);
     }
     initQueues();
     setUpdater();
     // Restore queues on start?
-    if (data.hasOwnProperty('restoreOnStart') && data.restoreOnStart) {
+    if (data.hasOwnProperty("restoreOnStart") && data.restoreOnStart) {
       restoreSavedQueues();
+    }
+    // Context menu
+    if (data.hasOwnProperty("hideContextMenu") && !data.hideContextMenu) {
+      createContextMenu();
     }
   }
   // Get the options from sync storage
@@ -405,7 +409,7 @@ function openUrlInTab(windowId, url, override, replaceCurrent) {
  * Open new window with associated queue
  */
 function openQueueInWindow(queue) {
-  chrome.windows.create({ 'focused': false }, function (windowInfo) {
+  chrome.windows.create({ "focused": false }, function (windowInfo) {
     // Update queue and items with the new window id
     queue.window = windowInfo.id;
     var items = queue.items;
@@ -450,11 +454,19 @@ function onSettingsChanged(changes, namespace) {
     if (changes.hasOwnProperty(key)) {
       storageChange = changes[key];
       newValue = storageChange.newValue;
-      if (key === 'tabLimit') {
+      if (key === "tabLimit") {
         tabLimit = newValue;
       }
-      else if (key === 'allowDuplicates') {
+      else if (key === "allowDuplicates") {
         allowDuplicates = newValue;
+      }
+      else if (key === "hideContextMenu") {
+        if (newValue) {
+          chrome.contextMenus.removeAll();
+        }
+        else {
+          createContextMenu();
+        }
       }
     }
   }
@@ -477,7 +489,7 @@ function cleanAndStore() {
       }
       // storage works only with strings
       var jsonQueues = JSON.stringify(queues);
-      chrome.storage.local.set({ 'queues': jsonQueues }, function () {
+      chrome.storage.local.set({ "queues": jsonQueues }, function () {
         if (chrome.runtime.lastError !== undefined) {
           console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
           console.error(chrome.runtime.lastError);
@@ -487,6 +499,17 @@ function cleanAndStore() {
       storing = false;
     }, 2000);
   }
+}
+
+/********************************************
+ * CONTEXT MENU
+ */
+function createContextMenu() {
+  chrome.contextMenus.create({
+    "title": "Open link in new tab (no limit)",
+    "contexts": ["link"],
+    "onclick": onContextMenuLinkClicked
+  });
 }
 
 /********************************************
@@ -501,7 +524,7 @@ function onCreatedTab(newTab) {
   if (!isActive) {
     return;
   }
-  // If the tab is overriding the limit, don't
+  // If the tab is overriding the limit, don"t
   // push it into the waiting list
   if (!isOverriding) {
     tabsWaiting.push(newTab);
@@ -551,8 +574,19 @@ function onWindowRemoved(id) {
   }
 }
 
-// LISTENERS
-document.addEventListener('DOMContentLoaded', init);
+/**
+ * Context Menu
+ */
+function onContextMenuLinkClicked(info) {
+  chrome.windows.getCurrent({}, function (windowInfo) {
+    openUrlInTab(windowInfo.id, info.linkUrl, true, false);
+  });
+}
+
+/********************************************
+ * Register listeners
+ */
+document.addEventListener("DOMContentLoaded", init);
 chrome.storage.onChanged.addListener(onSettingsChanged);
 chrome.tabs.onCreated.addListener(onCreatedTab);
 chrome.tabs.onUpdated.addListener(onUpdatedTab);

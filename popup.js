@@ -34,13 +34,13 @@ function reIndex(element, oldPos, newPos) {
  */
 function openItemInCurrentTab(evt) {
   evt.stopPropagation();
+  evt.preventDefault();
   if (evt.target.className !== "item-url") {
     return;
   }
   
   // ctrl, command (OSX), middle mouse
   var newTab = false;
-  console.log("Item clicked: " + evt.button);
   if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
     newTab = true;
   }
@@ -107,8 +107,8 @@ function onSavedListClick(evt) {
 /**
  * Show/hide remove button on queue item
  */
-function toggleRemoveButton(e) {
-  var remove = e.target.getElementsByClassName("item-remove")[0];
+function toggleRemoveButton(evt) {
+  var remove = evt.target.getElementsByClassName("item-remove")[0];
   remove.style.display = remove.style.display === "none" ? "inline" : "none";
 }
 
@@ -126,15 +126,15 @@ function toggleClearConfirm() {
 /**
  * Enable/disable item lock 
  */
-function toggleLock(e) {
-  var liElement = e.target.parentNode;
+function toggleLock(evt) {
+  var liElement = evt.target.parentNode;
   var state = false;
-  if (e.target.getAttribute("data-checked") === "false") { // toggle
+  if (evt.target.getAttribute("data-checked") === "false") { // toggle
     state = true;
   }
-  e.target.setAttribute("data-checked", state.toString());
+  evt.target.setAttribute("data-checked", state.toString());
   var image = state ? "images/lock-enabled.png" : "images/lock-disabled.png";
-  e.target.setAttribute("src", image);
+  evt.target.setAttribute("src", image);
   bgPage.setLock(queueId, liElement.value, state);
 }
 
@@ -158,6 +158,7 @@ function createItem(index, url, locked) {
   // Url
   var urlSpan = document.createElement("span");
   urlSpan.setAttribute("class", "item-url");
+  //urlSpan.setAttribute("href", url);
   urlSpan.textContent = url;
   // Remove button
   var remove = document.createElement("span");
@@ -202,10 +203,10 @@ function getBackgroundInfo() {
       for (var i = 0; i < urlArray.length; i++) { 
         // Append item to list
         urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));
-        // Finally add listener to close popup and open link in active tab
-        urlList.addEventListener("click", openItemInCurrentTab);
       }
-    } else {
+      urlList.addEventListener("click", openItemInCurrentTab);
+    }
+    else {
       info.textContent = "Queue is empty";
     }
   });

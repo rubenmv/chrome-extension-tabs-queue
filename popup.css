@@ -86,6 +86,10 @@ li {
 li:hover {
   background-color: #FDFEDE;
 }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 .item-url {
   display: inline-block;
   width: 82%;

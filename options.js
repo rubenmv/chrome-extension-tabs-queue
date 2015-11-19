@@ -7,7 +7,9 @@
     var
       tabLimit = document.getElementById("tabLimit").value,
       allowDuplicates = document.getElementById("duplicates").checked,
-      restoreOnStart = document.getElementById("restoreOnStart").checked;
+      restoreOnStart = document.getElementById("restoreOnStart").checked,
+      hideContextMenu = document.getElementById("hideContextMenu").checked;
+      
     if (tabLimit < 2) {
       document.getElementById("statusTabLimit").textContent = "Incorrect value, minimum of 2.";
       window.setTimeout(function () {
@@ -20,6 +22,7 @@
     options["tabLimit"] = tabLimit;
     options["allowDuplicates"] = allowDuplicates;
     options["restoreOnStart"] = restoreOnStart;
+    options["hideContextMenu"] = hideContextMenu;
 
     chrome.storage.local.set(options, function () {
       // Update status to let user know options were saved.
@@ -45,6 +48,7 @@
     options["tabLimit"] = TAB_LIMIT_DEFAULT;
     options["allowDuplicates"] = false;
     options["restoreOnStart"] = false;
+    options["hideContextMenu"] = false;
     /*  *************
       Get the items from localStorage
          ************* */
@@ -58,6 +62,7 @@
       document.getElementById("tabLimit").value = items.tabLimit;
       document.getElementById("duplicates").checked = items.allowDuplicates;
       document.getElementById("restoreOnStart").checked = items.restoreOnStart;
+      document.getElementById("hideContextMenu").checked = items.hideContextMenu;
     });
   }
   //Listener ftw
