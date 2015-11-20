@@ -17,6 +17,7 @@ var
   tabsWaiting = [],
   tabLimit = 10,
   allowDuplicates = false,
+  queueByRecent = false,
   queues = []; // Array of queued items
 
 // Regular expressions for url exclusions
@@ -190,6 +191,43 @@ function queueTab(tabState) {
 }
 
 /**
+ * Compare function to sort tabs array
+ */
+function compareById(a, b) {
+  if (a.id < b.id)
+    return -1;
+  if (a.id > b.id)
+    return 1;
+  return 0;
+}
+
+/**
+ * Queue tabs on the right to fit limit
+ */
+function queueToLimit(windowId) {
+  chrome.tabs.query({
+    "windowId": windowId,
+    "pinned": false
+  }, function (tabs) {
+    // Discard tabs from whitelist
+    for (var i = 0; i < tabs.length; i++) {
+      if (isInWhitelist(tabs[i].url)) {
+        tabs.splice(i, 1);
+        i--;
+      }
+    }
+    if (tabs.length > tabLimit) {
+      if (queueByRecent) {
+        tabs = tabs.sort(compareById);
+      }
+      for (var i = tabLimit; i < tabs.length; i++) {
+        queueTab(tabs[i]);
+      }
+    }
+  });
+}
+
+/**
  * Push new url to queue and save it in local storage
  */
 function saveItem(item) {
@@ -242,7 +280,6 @@ function setActive(active) {
   chrome.browserAction.setIcon({
     path: icon
   });
-  //onRemovedTab();
 }
 
 
@@ -289,6 +326,9 @@ function init() {
     }
     if (data.hasOwnProperty("allowDuplicates")) {
       allowDuplicates = data.allowDuplicates;
+    }
+    if (data.hasOwnProperty("allowDuplicates")) {
+      queueByRecent = data.queueByRecent;
     }
     if (data.hasOwnProperty("isActive")) {
       isActive = data.isActive;
@@ -439,7 +479,7 @@ function openQueueInWindow(queue) {
  * Restore a queue given a position in the list
  */
 function restoreQueue(position) {
-  if(!position) {
+  if (!position) {
     return;
   }
   openQueueInWindow(queues[position]);
@@ -474,6 +514,9 @@ function onSettingsChanged(changes, namespace) {
       else if (key === "allowDuplicates") {
         allowDuplicates = newValue;
       }
+      else if (key === "queueByRecent") {
+        queueByRecent = newValue;
+      }
       else if (key === "hideContextMenu") {
         if (newValue) {
           chrome.contextMenus.removeAll();
@@ -485,7 +528,9 @@ function onSettingsChanged(changes, namespace) {
     }
   }
 }
-
+/**
+ * Remove empty queues and save in local storage
+ */
 function cleanAndStore() {
   if (!storing) {
     storing = true;

@@ -265,6 +265,14 @@ function loadSavedQueues() {
 }
 
 /**
+ * Call queue to limit and close popup
+ */
+function onQueueToLimit() {
+  bgPage.queueToLimit(queueId);
+  window.close();
+}
+
+/**
  * Gets data from background page
  */
 function getBackgroundInfo() {
@@ -303,6 +311,7 @@ function getBackgroundInfo() {
   switchButton.checked = bgPage.isActive;
   document.getElementById("buttonClearQueues").addEventListener("click", toggleClearConfirm);
   document.getElementById("buttonClearItems").addEventListener("click", toggleClearConfirm);
+  document.getElementById("queueToLimit").addEventListener("click", onQueueToLimit);
   // Listeners for confirm dialogs and hide them
   var dlgs = document.getElementsByClassName("dialog-clear");
   for (var i = 0; i < dlgs.length; i++) {
