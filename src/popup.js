@@ -73,8 +73,8 @@ function onQueueListClick(evt) {
     if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
       newTab = true;
     }
-    // Open url, override limit, replace current tab
-    bgPage.openUrlInTab(queueId, evt.target.textContent, newTab, !newTab);
+    // openUrlInTab(windowId, url, position, override, replaceCurrent)
+    bgPage.openUrlInTab(queueId, evt.target.textContent, -1, newTab, !newTab);
   
     // Remove element from queue and storage, only if not locked
     // value (int) was added on getBackgroundInfo() when creating li elements

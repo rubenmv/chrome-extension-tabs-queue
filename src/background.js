@@ -443,7 +443,7 @@ function checkOpenNextItems(wdw) {
  * override = the tab goes into the override limit list
  * replaceCurrent = instead of new tab, replace/load in current
  */
-function openUrlInTab(windowId, url, override, replaceCurrent) {
+function openUrlInTab(windowId, url, position, override, replaceCurrent) {
   isOverriding = override;
   // If loads in current, no need to override limit
   if (replaceCurrent) {
@@ -453,11 +453,12 @@ function openUrlInTab(windowId, url, override, replaceCurrent) {
   }
   // Create new tab
   else {
-    chrome.tabs.create({
-      "windowId": windowId,
-      "url": url,
-      "active": false
-    });
+    if (position > -1) {
+      chrome.tabs.create({ "windowId": windowId, "url": url, "index": position, "active": false });
+    }
+    else {
+      chrome.tabs.create({ "windowId": windowId, "url": url, "active": false });
+    }
   }
 }
 
@@ -634,12 +635,10 @@ function onWindowRemoved(id) {
 }
 
 /**
- * Context Menu
+ * Context Menu action, open new tab next to current
  */
-function onContextMenuLinkClicked(info) {
-  chrome.windows.getCurrent({}, function (windowInfo) {
-    openUrlInTab(windowInfo.id, info.linkUrl, true, false);
-  });
+function onContextMenuLinkClicked(info, tab) {
+  openUrlInTab(tab.windowId, info.linkUrl, tab.index + 1, true, false);
 }
 
 /********************************************
