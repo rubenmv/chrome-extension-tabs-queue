@@ -479,7 +479,7 @@ function openQueueInWindow(queue) {
  * Restore a queue given a position in the list
  */
 function restoreQueue(position) {
-  if (!position) {
+  if (queues.length <= position) {
     return;
   }
   openQueueInWindow(queues[position]);

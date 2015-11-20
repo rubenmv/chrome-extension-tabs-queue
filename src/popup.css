@@ -62,7 +62,7 @@ h1:before {
   margin-right: 5px;
 }
 h2 {
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: #585858;
   margin-bottom: 0.5em;
   margin-top: 0.5em;
@@ -90,16 +90,21 @@ a {
   color: inherit;
   text-decoration: none;
 }
-.caption * {
-  display: inline-block;
-}
 .left {
+  display: inline-block;
   text-align: left;
   width: 50%;
 }
 .right {
+  display: inline-block;
   text-align: right;
   width: 48%;
+}
+.section {
+  padding: 0.5em;
+  border: 2px dashed #ddd;
+  margin: 0.5em 0;
+  border-radius: 5px;
 }
 .list-item-btn {
   display: none;
@@ -138,7 +143,7 @@ a {
   position: absolute;
   z-index: 100;
   width: 48%;
-  right: 20px;
+  right: 30px;
   padding: 0;
   background-color: #fff;
 }
