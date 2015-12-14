@@ -12,11 +12,13 @@ var
   isOverriding = false, // Next tab to open will override tab limit 
   storing = false, // To check if currently there"s a store operation waiting to finish
   updater = null, // Saves interval function
-  itemsToOpen = 0, // indicates if openNextItem() should be called again
+  checkingItems = false,
   // Tabs waiting for url update (before queuing)
   tabsWaiting = [],
   tabLimit = 10,
   allowDuplicates = false,
+  slowNetworkMode = false,
+  slowNetworkLimit = 0, // Slow network mode (active if > 0)
   queueByRecent = false,
   queues = []; // Array of queued items
 
@@ -327,8 +329,14 @@ function init() {
     if (data.hasOwnProperty("allowDuplicates")) {
       allowDuplicates = data.allowDuplicates;
     }
-    if (data.hasOwnProperty("allowDuplicates")) {
+    if (data.hasOwnProperty("queueByRecent")) {
       queueByRecent = data.queueByRecent;
+    }
+    if (data.hasOwnProperty("slowNetworkMode")) {
+      slowNetworkMode = data.slowNetworkMode;
+    }
+    if (data.hasOwnProperty("slowNetworkLimit")) {
+      slowNetworkLimit = data.slowNetworkLimit;
     }
     if (data.hasOwnProperty("isActive")) {
       isActive = data.isActive;
@@ -383,13 +391,41 @@ function setUpdater() {
     // Get all windows info
     chrome.windows.getAll({ "populate": true }, function (windows) {
       for (var i = 0; i < windows.length; i++) {
-        if (windows[i].type === "normal") {
+        if (windows[i].type === "normal" && !checkingItems) {
+          checkingItems = true;
           checkOpenNextItems(windows[i]);
+          checkingItems = false;
         }
       }
     });
     updateBadgeCounter();
-  }, 1000);
+  }, 500);
+}
+
+
+/**
+ * Calculate free space based on active limits given a set of tabs
+ * Return number of free spaces
+ */
+function calculateFreespace(tabs) {
+  var tabCount = 0, loadingTabCount = 0;
+  for (var i = 0; i < tabs.length; i++) {
+    if (!isInWhitelist(tabs[i].url) && !tabs[i].pinned) {
+      tabCount++;
+      if (tabs[i].status === "loading") {
+        loadingTabCount++;
+      }
+    }
+  }
+  var freeSpace = tabLimit - tabCount;
+  if (freeSpace > 0) {
+    if (slowNetworkMode && slowNetworkLimit > 0) { // Slow network mode active
+      if (loadingTabCount >= slowNetworkLimit) {
+        freeSpace = 0; // Don't load more tabs until current are finished loading
+      }
+    }
+  }
+  return freeSpace;
 }
 
 /**
@@ -404,19 +440,9 @@ function checkOpenNextItems(wdw) {
     return;
   }
   var currentQueue = getQueue(wdw.id).items;
-    
-  // Get number of opened tabs, whitelisted and pinned excluded
-  var tabCount = 0;
-  for (var i = 0; i < wdw.tabs.length; i++) {
-    if (!isInWhitelist(wdw.tabs[i].url) && !wdw.tabs[i].pinned) {
-      tabCount++;
-    }
-  }
-  var freeSpace = tabLimit - tabCount;
-  itemsToOpen = freeSpace;
+  var freeSpace = calculateFreespace(wdw.tabs);
   // Free space and items waiting
   if (freeSpace > 0 && currentQueue.length > 0) {
-    //openNextItem(windowId); // Open items one by one recursively
     // Create as many tabs as possible
     // First create the tabs, then remove the items from queue
     // after ALL new tabs have been created
@@ -525,6 +551,12 @@ function onSettingsChanged(changes, namespace) {
         else {
           createContextMenu();
         }
+      }
+      else if (key === "slowNetworkMode") {
+        slowNetworkMode = newValue;
+      }
+      else if(key === "slowNetworkLimit") {
+        slowNetworkLimit = newValue;
       }
     }
   }

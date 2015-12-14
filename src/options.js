@@ -11,7 +11,9 @@ function saveOptions() {
     allowDuplicates = document.getElementById("duplicates").checked,
     restoreOnStart = document.getElementById("restoreOnStart").checked,
     hideContextMenu = document.getElementById("hideContextMenu").checked,
-    queueByRecent = document.getElementById("queueMode1").checked;
+    queueByRecent = document.getElementById("queueMode1").checked,
+    slowNetworkMode = document.getElementById("slowNetworkMode").checked,
+    slowNetworkLimit = document.getElementById("slowNetworkLimit").value;
 
   if (tabLimit < 2) {
     document.getElementById("statusTabLimit").textContent = "Incorrect value, minimum of 2.";
@@ -27,6 +29,8 @@ function saveOptions() {
   options["restoreOnStart"] = restoreOnStart;
   options["hideContextMenu"] = hideContextMenu;
   options["queueByRecent"] = queueByRecent;
+  options["slowNetworkMode"] = slowNetworkMode;
+  options["slowNetworkLimit"] = slowNetworkLimit;
 
   chrome.storage.local.set(options, function () {
     // Update status to let user know options were saved.
@@ -57,6 +61,8 @@ function restoreOptions() {
   options["restoreOnStart"] = false;
   options["hideContextMenu"] = false;
   options["queueByRecent"] = false;
+  options["slowNetworkMode"] = false;
+  options["slowNetworkLimit"] = TAB_LIMIT_DEFAULT;
   /*  *************
     Get the items from localStorage
        ************* */
@@ -77,6 +83,8 @@ function restoreOptions() {
     else {
       document.getElementById("queueMode0").checked = true;
     }
+    document.getElementById("slowNetworkMode").checked = items.slowNetworkMode;
+    document.getElementById("slowNetworkLimit").checked = items.slowNetworkLimit;
   });
 }
 //Listener ftw

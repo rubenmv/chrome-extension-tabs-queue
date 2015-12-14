@@ -14,8 +14,8 @@
     <h1>Tabs limiter with queue settings</h1>
   </header>
   <div id="wrapper-main">
-    <!--Tab limits-->
     <div class="section">
+      <!-- Tabs limit -->      
       <div class="controls">
         <span>Limit: </span>
         <input type="number" min="2" value="10" id="tabLimit" />
@@ -28,6 +28,7 @@
         NOTE: "Reopen closed tab" will also queue it if the limit has been reached.
         </span>
       </div>
+      <!-- Allow duplicates -->
       <hr>
       <div class="controls">
         <input id="duplicates" type="checkbox" name="duplicates" value="duplicates">
@@ -36,6 +37,7 @@
       <div class="help">
         <span>Duplicated tabs are not discarded.</span>
       </div>
+      <!-- Restore on start -->
       <hr>
       <div class="controls">
         <input id="restoreOnStart" type="checkbox" name="restoreOnStart" value="restoreOnStart">
@@ -44,6 +46,7 @@
       <div class="help">
         <span>When Chrome starts open saved queues into different windows.</span>
       </div>
+      <!-- Hide context menu options -->
       <hr>
       <div class="controls">
         <input id="hideContextMenu" type="checkbox" name="hideContextMenu" value="hideContextMenu">
@@ -52,6 +55,7 @@
       <div class="help">
         <span>Hides any context menu entries related with this extension.</span>
       </div>
+      <!-- Fit limit mode -->
       <hr>
       <div class="controls">
         <label>On button click to fit limit, queue tabs by:</label>
@@ -66,6 +70,21 @@
         <span><b>Position on the right</b> queue tabs on the right but following a left-to-right order.</span>
         <br>
         <span><b>Most recent</b> queue tabs starting with the most recently opened.</span>
+      </div>
+      <!-- Slow network mode -->
+      <hr>      
+      <div class="controls">
+        <input id="slowNetworkMode" type="checkbox" name="slowNetworkMode" value="slowNetworkMode">
+        <label for="slowNetworkMode">Slow network mode</label><br><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Limit: </span>
+        <input type="number" min="0" value="0" id="slowNetworkLimit" />
+        <span id="statusNetworkLimit" class="alert"></span>
+      </div>
+      <div class="help">
+        <span>Sets maximum of loading tabs. If number of current loading tabs reaches this limit, queued items won't be loaded even if there's enough free spaces.</span>
+        <br>
+        <span class="warning">Pinned tabs and Chrome specific pages won't count for this limit, these are pages like chrome://newtab or chrome-extension://.
+        </span>
       </div>
     </div>
     <!-- Save -->
