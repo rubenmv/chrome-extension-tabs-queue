@@ -16,6 +16,7 @@ var
   // Tabs waiting for url update (before queuing)
   tabsWaiting = [],
   tabLimit = 10,
+  lifo = false, // last-in-first-out. New items to top of the queue
   allowDuplicates = false,
   slowNetworkMode = false,
   slowNetworkLimit = 0, // Slow network mode (active if > 0)
@@ -99,7 +100,7 @@ function moveItemInQueue(queueId, oldPos, newPos) {
  */
 function getQueue(windowId) {
   for (var i = 0; i < queues.length; i++) {
-    if (queues[i].window == windowId) {
+    if (queues[i].window !== DEFAULT_ID && queues[i].window == windowId) {
       return queues[i];
     }
   }
@@ -243,7 +244,12 @@ function saveItem(item) {
     }
   }
   // Push to queue
-  qu.push(item);
+  if (lifo) {
+    qu.unshift(item);
+  }
+  else {
+    qu.push(item);
+  }
   // Update local storage and badge
   cleanAndStore();
 }
@@ -325,6 +331,9 @@ function init() {
     // Initialize properties
     if (data.hasOwnProperty("tabLimit")) {
       tabLimit = data.tabLimit;
+    }
+    if (data.hasOwnProperty("lifo")) {
+      lifo = data.lifo;
     }
     if (data.hasOwnProperty("allowDuplicates")) {
       allowDuplicates = data.allowDuplicates;
@@ -419,9 +428,10 @@ function calculateFreespace(tabs) {
   }
   var freeSpace = tabLimit - tabCount;
   if (freeSpace > 0) {
-    if (slowNetworkMode && slowNetworkLimit > 0) { // Slow network mode active
-      if (loadingTabCount >= slowNetworkLimit) {
-        freeSpace = 0; // Don't load more tabs until current are finished loading
+    if (slowNetworkMode) { // Slow network mode active
+      var loadingSpace = slowNetworkLimit - loadingTabCount;
+      if (loadingSpace < freeSpace) {
+        freeSpace = loadingSpace;
       }
     }
   }
@@ -538,6 +548,9 @@ function onSettingsChanged(changes, namespace) {
       if (key === "tabLimit") {
         tabLimit = newValue;
       }
+      else if (key === "lifo") {
+        lifo = newValue;
+      }
       else if (key === "allowDuplicates") {
         allowDuplicates = newValue;
       }
@@ -555,7 +568,7 @@ function onSettingsChanged(changes, namespace) {
       else if (key === "slowNetworkMode") {
         slowNetworkMode = newValue;
       }
-      else if(key === "slowNetworkLimit") {
+      else if (key === "slowNetworkLimit") {
         slowNetworkLimit = newValue;
       }
     }
@@ -673,6 +686,34 @@ function onContextMenuLinkClicked(info, tab) {
   openUrlInTab(tab.windowId, info.linkUrl, tab.index + 1, true, false);
 }
 
+/**
+ * On installed or updated, import queue from old versions (<= 1.0)
+ */
+function onInstalled() {
+  console.log("on installed...");
+  function queueDataRetrieved(items) {
+    // Fill queue
+    if (items.hasOwnProperty('queueLength')) {
+      // Get/create a new queue
+      var q = getQueue(DEFAULT_ID);
+      
+      console.log("old queue length: " + items.queueLength);
+      for (var i = 0; i < items.queueLength; i++) {
+        console.log(['item' + i]);
+        // Create item
+        var item = new Item(DEFAULT_ID, DEFAULT_ID, items['item' + i], "complete", false);
+        // push to queue
+        q.items.push(item);
+      }
+    }
+    // CLEANUP OLD ITEMS IN STORAGE
+
+    cleanAndStore();
+  }
+
+  chrome.storage.local.get(null, queueDataRetrieved);
+}
+
 /********************************************
  * Register listeners
  */
@@ -681,3 +722,4 @@ chrome.storage.onChanged.addListener(onSettingsChanged);
 chrome.tabs.onCreated.addListener(onCreatedTab);
 chrome.tabs.onUpdated.addListener(onUpdatedTab);
 chrome.windows.onRemoved.addListener(onWindowRemoved);
+chrome.runtime.onInstalled.addListener(onInstalled);

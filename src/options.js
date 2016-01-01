@@ -8,6 +8,7 @@ var TAB_LIMIT_DEFAULT = 10;
 function saveOptions() {
   var
     tabLimit = document.getElementById("tabLimit").value,
+    lifo = document.getElementById("lifo").checked,
     allowDuplicates = document.getElementById("duplicates").checked,
     restoreOnStart = document.getElementById("restoreOnStart").checked,
     hideContextMenu = document.getElementById("hideContextMenu").checked,
@@ -25,6 +26,7 @@ function saveOptions() {
   // Set the options object
   var options = {};
   options["tabLimit"] = tabLimit;
+  options["lifo"] = lifo;
   options["allowDuplicates"] = allowDuplicates;
   options["restoreOnStart"] = restoreOnStart;
   options["hideContextMenu"] = hideContextMenu;
@@ -57,6 +59,7 @@ function restoreOptions() {
        ************* */
   var options = {};
   options["tabLimit"] = TAB_LIMIT_DEFAULT;
+  options["lifo"] = false;
   options["allowDuplicates"] = false;
   options["restoreOnStart"] = false;
   options["hideContextMenu"] = false;
@@ -74,6 +77,7 @@ function restoreOptions() {
     }
     //TABS LIMIT
     document.getElementById("tabLimit").value = items.tabLimit;
+    document.getElementById("lifo").checked = items.lifo;
     document.getElementById("duplicates").checked = items.allowDuplicates;
     document.getElementById("restoreOnStart").checked = items.restoreOnStart;
     document.getElementById("hideContextMenu").checked = items.hideContextMenu;
@@ -84,7 +88,7 @@ function restoreOptions() {
       document.getElementById("queueMode0").checked = true;
     }
     document.getElementById("slowNetworkMode").checked = items.slowNetworkMode;
-    document.getElementById("slowNetworkLimit").checked = items.slowNetworkLimit;
+    document.getElementById("slowNetworkLimit").value = items.slowNetworkLimit;
   });
 }
 //Listener ftw
