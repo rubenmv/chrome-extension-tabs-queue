@@ -6,7 +6,7 @@
         "--no-color"
     ],
     "tasks": [{
-        "taskName": "build",
+        "taskName": "default",
         "args": [],
         "isBuildCommand": true
     }]

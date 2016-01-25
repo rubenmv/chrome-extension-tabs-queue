@@ -23,4 +23,4 @@ gulp.task('minify-html', function () {
         .pipe(gulp.dest('release'))
 });
 // Default Task
-gulp.task('build', ['uglify', 'minify-css', 'minify-html']);
+gulp.task('default', ['uglify', 'minify-css', 'minify-html']);
