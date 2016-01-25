@@ -15,7 +15,7 @@
   </header>
   <div id="wrapper-main">
     <div class="section">
-      <!-- Tabs limit -->      
+      <!-- Tabs limit -->
       <div class="controls">
         <span>Limit: </span>
         <input type="number" min="2" value="10" id="tabLimit" />
@@ -24,7 +24,7 @@
       <div class="help">
         <span>Sets maximum of opened tabs. New tabs will be queued.</span>
         <br>
-        <span class="warning">Pinned tabs and Chrome specific pages won't count for this limit, these are pages like chrome://newtab or chrome-extension://.<br>
+        <span class="warning">Pinned tabs and Chrome specific pages won't count on this limit, these are pages like chrome://newtab or chrome-extension://.<br>
         NOTE: "Reopen closed tab" will also queue it if the limit has been reached.
         </span>
       </div>
@@ -53,7 +53,7 @@
         <label for="restoreOnStart">Restore on start</label>
       </div>
       <div class="help">
-        <span>When Chrome starts open saved queues into different windows.</span>
+        <span>When Chrome starts restore queues into different windows.</span>
       </div>
       <!-- Hide context menu options -->
       <hr>
@@ -62,12 +62,12 @@
         <label for="hideContextMenu">Hide context menu options</label>
       </div>
       <div class="help">
-        <span>Hides any context menu entries related with this extension.</span>
+        <span>Disable context menu entries.</span>
       </div>
       <!-- Fit limit mode -->
       <hr>
       <div class="controls">
-        <label>On button click to fit limit, queue tabs by:</label>
+        <label>When clicking on "Queue to fit limit", queue tabs by:</label>
         <br>
         <input type="radio" id="queueMode0" name="queue-mode" value="0">
         <label for="queueMode0">Position on the right</label>
@@ -81,16 +81,18 @@
         <span><b>Most recent</b> queue tabs starting with the most recently opened.</span>
       </div>
       <!-- Slow network mode -->
-      <hr>      
+      <hr>
       <div class="controls">
         <input id="slowNetworkMode" type="checkbox" name="slowNetworkMode" value="slowNetworkMode">
-        <label for="slowNetworkMode">Slow network mode</label><br><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Limit: </span>
+        <label for="slowNetworkMode">Slow network mode</label>
+        <br>
+        <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <span>Limit: </span>
         <input type="number" min="0" value="0" id="slowNetworkLimit" />
         <span id="statusNetworkLimit" class="alert"></span>
       </div>
       <div class="help">
-        <span>Sets maximum of loading tabs. If number of current loading tabs reaches this limit, queued items won't be loaded even if there's enough free spaces.</span>
+        <span>Sets maximum of loading tabs. If number of current loading tabs reaches this limit, queued items won't be released even if there's enough free spaces.</span>
         <br>
         <span class="warning">Pinned tabs and Chrome specific pages won't count for this limit, these are pages like chrome://newtab or chrome-extension://.
         </span>
@@ -104,12 +106,22 @@
       <!-- VERSION INFO -->
       <h2>version</h2>
       <div>
-        <p>Current version: 1.1.4
+        <p>Current version: 2.0
+          <br>
           <ul>
-            <li>"Queue to fit limit" button to queue tabs that exceed the current limit.</li>
-            <li>Two modes for the queue to fit limit button: queue tabs on the right or by most recently opened.</li>
+            <li>Multi-window queues. When a window in closed, the queue (if not empty) is saved.</li>
+            <li>Improved popup: List saved queues. Add/delete/restore/sort saved queues and items.</li>
+            <li>Lock items in current queue.</li>
+            <li>&#34;Queue to fit limit&#34; button in popup with two modes.</li>
+            <li>Context menu option to override queue limit.</li>
+            <li>On/off button.</li>
+            <li>Automatic queue migration from version 1.0.</li>
+            <li>Slow network mode: adds a new limit for loading tabs.</li>
+            <li>Inverse mode: New items will be added to the top of the queue.</li>
           </ul>
-          <a href="https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/VERSION">See full changelog.</a></p>
+          <a href="https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/VERSION.md">Version history</a>
+          <br>
+          <a href="https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/CHANGELOG.md">See full changelog</a></p>
       </div>
       <!-- FEEDBACK -->
       <h2>feedback</h2>
@@ -142,7 +154,7 @@
         <p>This extension makes use of <a href="https://github.com/RubaXa/Sortable">Sortable.js</a>, which is distributed under
           the <a href="https://opensource.org/licenses/MIT">MIT License</a>.</p>
         <p>
-          Extension icon made by <a href="http://www.picol.org/" title="Stephen Hutchings">Picol</a> is licensed under
+          Icon by <a href="http://www.picol.org/" title="Stephen Hutchings">Picol</a> is licensed under
           <a href="http://creativecommons.org/licenses/by-sa/3.0/" title="Creative Commons BY SA 3.0">CC BY SA 3.0</a>
         </p>
       </div>

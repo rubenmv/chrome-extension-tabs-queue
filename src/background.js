@@ -687,28 +687,34 @@ function onContextMenuLinkClicked(info, tab) {
 }
 
 /**
- * On installed or updated, import queue from old versions (<= 1.0)
+ * MIGRATE. On installed or updated, import queue from old versions (<= 1.0)
  */
 function onInstalled() {
-  console.log("on installed...");
   function queueDataRetrieved(items) {
     // Fill queue
     if (items.hasOwnProperty('queueLength')) {
       // Get/create a new queue
       var q = getQueue(DEFAULT_ID);
-      
-      console.log("old queue length: " + items.queueLength);
+      // Keys to remove when finished
+      var keys = ['queueLength'];
       for (var i = 0; i < items.queueLength; i++) {
-        console.log(['item' + i]);
         // Create item
-        var item = new Item(DEFAULT_ID, DEFAULT_ID, items['item' + i], "complete", false);
+        var k = 'item' + i;
+        var item = new Item(DEFAULT_ID, DEFAULT_ID, items[k], "complete", false);
+        keys.push(k); // Push to remove when finished
         // push to queue
         q.items.push(item);
       }
+      // Cleanup old items in storage and save new queue
+      chrome.storage.local.remove(keys, function () {
+        if (chrome.runtime.lastError !== undefined) {
+          console.error("An error ocurred removing old storage keys: " + chrome.runtime.lastError.string);
+          console.error(chrome.runtime.lastError);
+          return;
+        }
+      });
+      cleanAndStore();
     }
-    // CLEANUP OLD ITEMS IN STORAGE
-
-    cleanAndStore();
   }
 
   chrome.storage.local.get(null, queueDataRetrieved);

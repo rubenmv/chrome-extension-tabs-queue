@@ -1,17 +1,25 @@
-1.1.4 - 2015.11.20
+# Change Log
+All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
+
+## [2.0.0] 2016-01-25
+- Added inverse mode option. New items will be added to the top of the queue.
+- Added slow network mode. Sets a new limit for loading tabs.
+- Added queue migration from version 1.0.
+
+## [1.1.4] 2015-11-20
 - "Queue to fit limit" button to queue tabs that exceed the current limit.
 - Two modes for the queue to fit limit button: queue tabs on the right or by most recently opened.
 
-1.1.3 - 2015.11.19
+## [1.1.3] 2015-11-19
 - Button to clear all queues.
 - Restore and remove buttons for saved queues items (popup).
 - Reduces the number of event listeners for buttons in list items (popup).
 
-1.1.2 - 2015.11.16
+## [1.1.2] 2015-11-16
 - Open queue items manually in a new tab with ctrl+click/middle mouse button.
 - Items opened manually override the tab limit, so they won't get queued again.
 
-1.1.1 - 2015.11.15
+## [1.1.1] 2015-11-15
 - Separate queues per window.
 - "Clear all" confirmation dialog.
 - Basic saved queues management.
@@ -24,7 +32,7 @@
 - Option to enable/disable duplicates.
 - Added feedback module to options page.
 
-1.0.0 - 2014.09.10
+## [1.0.0] 2014-09-10
 - Add items to queue depending on limit.
 - Open items in queue when there is enough space.
 - Button to clear all items.
