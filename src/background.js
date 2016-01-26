@@ -360,7 +360,7 @@ function init() {
     initQueues();
     setUpdater();
     // Restore queues on start?
-    if (data.hasOwnProperty("restoreOnStart") && data.restoreOnStart) {
+    if (isActive && data.hasOwnProperty("restoreOnStart") && data.restoreOnStart) {
       restoreSavedQueues();
     }
     // Context menu

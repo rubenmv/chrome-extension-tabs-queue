@@ -18,5 +18,5 @@ https://goo.gl/trWZdS
 
 ##LEGAL STUFF##
 **Tabs limiter with queue** by <a href="https://twitter.com/rub3nmv">**Rub&eacute;n Mart&iacute;nez**</a> is licensed as <a href="http://www.gnu.org/licenses/gpl-3.0.txt">GPLv3</a>.  
-Default icon made by <a href="http://www.typicons.com" title="Stephen Hutchings">Stephen Hutchings</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
+Icon by <a href="http://www.typicons.com" title="Stephen Hutchings">Stephen Hutchings</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
 

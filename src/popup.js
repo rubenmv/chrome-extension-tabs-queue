@@ -233,7 +233,7 @@ function loadSavedQueues() {
       li = document.createElement("li");
       li.setAttribute("value", i);
       // Title
-      var title = document.createElement("h3");
+      var title = document.createElement("span");
       title.textContent = "Queue " + savedCount + " :: " + qus[i].items.length + " items";
       title.setAttribute("class", "left");
       var restore = document.createElement("span");

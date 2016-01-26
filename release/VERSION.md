@@ -1,8 +1,8 @@
 # Version log
 Short changelog for the main public version. The dates correspond with the dates of release in Chrome Store.
-Full changelog here: https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/CHANGELOG.md"
+Full changelog here: https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/CHANGELOG.md
 
-## [2.0.0] 2016-01-25
+## [2.0.0] 2016-01-26
 - Multi-window queues. When a window in closed, the queue (if not empty) is saved.
 - Improved popup: List saved queues. Add/delete/restore/sort saved queues and items.
 - Lock items in current queue.
