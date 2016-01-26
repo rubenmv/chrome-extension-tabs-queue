@@ -165,6 +165,22 @@ function clearQueues() {
 }
 
 /**
+ * Removes only saved queues
+ */
+function clearSavedQueues() {
+  var i = 0;
+  while(i < queues.length) {
+    if (queues[i].window === DEFAULT_ID) {
+      queues.splice(i, 1);
+    }
+    else {
+      i++;
+    }
+  }
+  cleanAndStore();
+}
+
+/**
  * Removes all items in queue
  */
 function clearItems(queueId) {

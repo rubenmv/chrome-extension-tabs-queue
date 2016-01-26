@@ -33,7 +33,7 @@ function reIndex(element, oldPos, newPos) {
  * Clear all queues
 */
 function onClearQueues() {
-  bgPage.clearQueues();
+  bgPage.clearSavedQueues();
   window.close();
 }
 
