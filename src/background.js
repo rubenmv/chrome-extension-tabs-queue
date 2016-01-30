@@ -552,13 +552,13 @@ function openQueueInWindow(queue) {
 }
 
 /**
- * Restore a queue given a position in the list
+ * Restores a queue given an index in the list
  */
-function restoreQueue(position) {
-  if (queues.length <= position) {
+function restoreQueue(index) {
+  if (queues.length <= index) {
     return;
   }
-  openQueueInWindow(queues[position]);
+  openQueueInWindow(queues[index]);
 }
 
 /**
@@ -570,6 +570,23 @@ function restoreSavedQueues() {
       openQueueInWindow(queues[i]);
     }
   }
+}
+
+/**
+ * Merges queue with current and removes it
+ * index = position of queue to merge
+ * currentId = id of current window queue
+ */
+function mergeQueue(index, currentId) {
+  if (queues.length <= index) {
+    return;
+  }
+  var current = getQueue(currentId),
+      qMerger = queues[index]; 
+  for (var i = 0; i < qMerger.items.length; i++) {
+    current.items.push(qMerger.items[i]);
+  }
+  queues.splice(index, 1);
 }
 
 /**********************************************

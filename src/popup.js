@@ -12,17 +12,18 @@ var
 /**
 * Updates/removes index/value attribute on list items and update queue
 */
-function reIndex(parentList, element, oldPos, newPos) {
+function reIndex(element, oldPos, newPos) {
+  var list = document.getElementById("url-list");
   // Just remove item
   if (newPos === -1) {
     bgPage.removeItem(queueId, element.value); // window/queue, tab index
-    parentList.removeChild(element);
+    list.removeChild(element);
   }
   else { // Move in queue
     bgPage.moveItemInQueue(queueId, oldPos, newPos);
   }
   // Reindex list
-  var items = parentList.getElementsByClassName("list-item");
+  var items = list.getElementsByClassName("list-item");
   for (var i = 0; i < items.length; i++) {
     items[i].value = i;
   }
@@ -82,12 +83,12 @@ function onQueueListClick(evt) {
 
     var itemLock = liElement.getElementsByClassName("item-lock")[0];
     if (itemLock && itemLock.getAttribute("data-checked") === "false") {
-      reIndex(list, liElement, liElement.value, -1); // Reindex list (-1 to remove item)
+      reIndex(liElement, liElement.value, -1); // Reindex list (-1 to remove item)
     }
   }
   else if (evt.target.classList.contains("list-item-btn")) {
     if (evt.target.getAttribute("data-type") === "list-item-remove") {
-      reIndex(list, liElement, liElement.value, -1);
+      reIndex(liElement, liElement.value, -1);
     }
   }
 }
@@ -103,6 +104,9 @@ function onSavedListClick(evt) {
   if (evt.target.classList.contains("list-item-btn")) {
     if (evt.target.getAttribute("data-type") === "list-item-restore") {
       bgPage.restoreQueue(value);
+    }
+    else if (evt.target.getAttribute("data-type") === "list-item-merge") {
+      bgPage.mergeQueue(value, queueId);
     }
     else if (evt.target.getAttribute("data-type") === "list-item-remove") {
       bgPage.removeQueue(value);
@@ -250,17 +254,26 @@ function loadSavedQueues() {
       title.setAttribute("data-type", "list-item-title");
       var restore = document.createElement("span");
       restore.setAttribute("class", "list-item-btn");
+      restore.setAttribute("alt", "Restore queue in a new window");
       restore.setAttribute("data-type", "list-item-restore");
       restore.textContent = "o";
       restore.style.display = "none";
+      var merge = document.createElement("span");
+      merge.setAttribute("class", "list-item-btn");
+      merge.setAttribute("alt", "Merge with current list");
+      merge.setAttribute("data-type", "list-item-merge");
+      merge.textContent = "v";
+      merge.style.display = "none";
       var remove = document.createElement("span");
       remove.setAttribute("class", "list-item-btn");
+      remove.setAttribute("alt", "Delete queue");
       remove.setAttribute("data-type", "list-item-remove");
       remove.textContent = "x";
       remove.style.display = "none";
       // Append content
       liQueue.appendChild(title);
       liQueue.appendChild(restore);
+      liQueue.appendChild(merge);
       liQueue.appendChild(remove);
       // Listeners
       liQueue.addEventListener("mouseenter", toggleListItemButton);
@@ -312,7 +325,8 @@ function getBackgroundInfo() {
         animation: 100, // ms, animation speed moving items when sorting, `0` — without animation
         handle: ".handle", // Restricts sort start click/touch to the specified element
         onEnd: function (evt) {
-          reIndex(urlList, null, evt.oldIndex, evt.newIndex);
+          console.log(urlList);
+          reIndex(null, evt.oldIndex, evt.newIndex);
         }
       });
       itemsInfo.textContent = "Queue in this window";
