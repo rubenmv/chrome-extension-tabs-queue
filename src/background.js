@@ -36,7 +36,8 @@ var ICON_DISABLED = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAA
  */
 function Queue(windowId) {
   this.window = windowId,
-  this.items = [];
+  this.name = formatDateTime(Date.now()),
+  this.items = [],
   this.openingTab = false; // Currently opening a tab
 }
 
@@ -47,7 +48,7 @@ function Item(id, windowId, url, state, locked) {
   this.id = id,
   this.window = windowId, // original window/queue where it was created
   this.url = url,
-  this.state = state;
+  this.state = state,
   this.locked = locked;
 }
 
@@ -169,7 +170,7 @@ function clearQueues() {
  */
 function clearSavedQueues() {
   var i = 0;
-  while(i < queues.length) {
+  while (i < queues.length) {
     if (queues[i].window === DEFAULT_ID) {
       queues.splice(i, 1);
     }
@@ -283,6 +284,28 @@ function removeItem(queueId, index) {
 /***********************************************************
  * GENERAL
  */
+
+/**
+ * Gets date and returns formatted human readable date/time as string
+ * Input and output must be strings
+ */
+function formatDateTime(dt) {
+  var datetime = new Date(dt);
+  try {
+    var month = datetime.getMonth() + 1;
+    if(month < 10) {
+      month = "0" + month;
+    }
+    var date = datetime.getFullYear() + "-" + month + "-" + datetime.getDate();
+    var time = datetime.getHours() + ":" + datetime.getMinutes() + ":" + datetime.getSeconds();
+    dt = date + " " + time;
+  }
+  catch (err) {
+    dt = "queue";
+    console.error(err);
+  }
+  return dt;
+}
 
 /**
  * Change active state and browser action icon
@@ -688,10 +711,11 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
 function onWindowRemoved(id) {
   var queue = getQueue(id);
   if (queue.items.length > 0) {
+    queue.name = formatDateTime(Date.now());
     queue.window = DEFAULT_ID;
-    for (var i = 0; i < queue.items.length; i++) {
+    /*for (var i = 0; i < queue.items.length; i++) {
       queue.items[i].window = DEFAULT_ID;
-    }
+    }*/
   }
 }
 

@@ -1,0 +1,1 @@
+{"C:\\Users\\Ruben\\GitHub\\chrome-extension-tabs-queue\\gulpfile.js":{"sha1":"0005fd0a597e95e19f137c604ca73d27930905b1","tasks":{"uglify":{"name":"uglify","dependencies":""},"minify-css":{"name":"minify-css","dependencies":""},"minify-html":{"name":"minify-html","dependencies":""},"default":{"name":"default","dependencies":"uglify minify-css minify-html"}}}}

@@ -12,18 +12,17 @@ var
 /**
 * Updates/removes index/value attribute on list items and update queue
 */
-function reIndex(element, oldPos, newPos) {
-  var list = document.getElementById("url-list");
+function reIndex(parentList, element, oldPos, newPos) {
   // Just remove item
   if (newPos === -1) {
     bgPage.removeItem(queueId, element.value); // window/queue, tab index
-    list.removeChild(element);
+    parentList.removeChild(element);
   }
   else { // Move in queue
     bgPage.moveItemInQueue(queueId, oldPos, newPos);
   }
   // Reindex list
-  var items = list.getElementsByClassName("list-item");
+  var items = parentList.getElementsByClassName("list-item");
   for (var i = 0; i < items.length; i++) {
     items[i].value = i;
   }
@@ -67,7 +66,7 @@ function onQueueListClick(evt) {
   evt.stopPropagation();
   evt.preventDefault();
   var liElement = evt.target.parentNode;
-  if (evt.target.className === "item-url") {
+  if (evt.target.classList.contains("item-url")) {
     // ctrl, command (OSX), middle mouse
     var newTab = false;
     if (evt.ctrlKey || evt.metaKey || evt.button == 1) {
@@ -79,14 +78,16 @@ function onQueueListClick(evt) {
     // Remove element from queue and storage, only if not locked
     // value (int) was added on getBackgroundInfo() when creating li elements
     
+    var list = document.getElementById("url-list");
+
     var itemLock = liElement.getElementsByClassName("item-lock")[0];
     if (itemLock && itemLock.getAttribute("data-checked") === "false") {
-      reIndex(liElement, liElement.value, -1); // Reindex list (-1 to remove item)
+      reIndex(list, liElement, liElement.value, -1); // Reindex list (-1 to remove item)
     }
   }
-  else if (evt.target.className === "list-item-btn") {
+  else if (evt.target.classList.contains("list-item-btn")) {
     if (evt.target.getAttribute("data-type") === "list-item-remove") {
-      reIndex(liElement, liElement.value, -1);
+      reIndex(list, liElement, liElement.value, -1);
     }
   }
 }
@@ -96,17 +97,25 @@ function onQueueListClick(evt) {
  */
 function onSavedListClick(evt) {
   evt.stopPropagation();
-  if (evt.target.className !== "list-item-btn") {
-    return;
+  // Button clicked
+  var parent = evt.target.parentNode,
+    value = parent.value;
+  if (evt.target.classList.contains("list-item-btn")) {
+    if (evt.target.getAttribute("data-type") === "list-item-restore") {
+      bgPage.restoreQueue(value);
+    }
+    else if (evt.target.getAttribute("data-type") === "list-item-remove") {
+      bgPage.removeQueue(value);
+
+    }
+    window.close();
   }
-  var value = evt.target.parentNode.value;
-  if (evt.target.getAttribute("data-type") === "list-item-restore") {
-    bgPage.restoreQueue(value);
+  else if (evt.target.getAttribute("data-type") === "list-item-title") {
+    var ol = parent.getElementsByTagName("ol");
+    if (ol.length > 0) {
+      ol[0].style.display = (ol[0].style.display === "none") ? "block" : "none";
+    }
   }
-  else if (evt.target.getAttribute("data-type") === "list-item-remove") {
-    bgPage.removeQueue(value);
-  }
-  window.close();
 }
 
 /****************************************************
@@ -225,17 +234,20 @@ function loadSavedQueues() {
     list = document.getElementById("savedQueuesList"),
     queuesInfo = document.getElementById("savedQueuesInfo"),
     savedCount = 0,
-    li = null;
+    liQueue = null;
+
   for (var i = 0; i < qus.length; i++) {
     if (qus[i].window === bgPage.DEFAULT_ID) {
       savedCount++;
       // LI element
-      li = document.createElement("li");
-      li.setAttribute("value", i);
+      liQueue = document.createElement("li");
+      liQueue.setAttribute("value", i);
       // Title
       var title = document.createElement("span");
-      title.textContent = "Queue " + savedCount + " :: " + qus[i].items.length + " items";
+      //title.textContent = "Queue " + savedCount + " :: " + qus[i].items.length + " items";
+      title.textContent = qus[i].name + " :: " + qus[i].items.length + " items";
       title.setAttribute("class", "left");
+      title.setAttribute("data-type", "list-item-title");
       var restore = document.createElement("span");
       restore.setAttribute("class", "list-item-btn");
       restore.setAttribute("data-type", "list-item-restore");
@@ -247,14 +259,26 @@ function loadSavedQueues() {
       remove.textContent = "x";
       remove.style.display = "none";
       // Append content
-      li.appendChild(title);
-      li.appendChild(restore);
-      li.appendChild(remove);
+      liQueue.appendChild(title);
+      liQueue.appendChild(restore);
+      liQueue.appendChild(remove);
       // Listeners
-      li.addEventListener("mouseenter", toggleListItemButton);
-      li.addEventListener("mouseleave", toggleListItemButton);
+      liQueue.addEventListener("mouseenter", toggleListItemButton);
+      liQueue.addEventListener("mouseleave", toggleListItemButton);
 
-      list.appendChild(li);
+      list.appendChild(liQueue);
+
+      var olItems = document.createElement("ol");
+      olItems.setAttribute("class", "sublist");
+      olItems.style.display = "none";
+      // Load list items (read-only)
+      var itemList = qus[i].items;
+      for (var j = 0; j < itemList.length; j++) {
+        var liItem = document.createElement("li");
+        liItem.textContent = itemList[j].url;
+        olItems.appendChild(liItem);
+      }
+      liQueue.appendChild(olItems);
     }
   }
   // Listen to clicks on list
@@ -285,10 +309,10 @@ function getBackgroundInfo() {
       //var list = document.getElementById("my-ui-list");
       //Sortable.create(urlList); // That"s all.
       Sortable.create(urlList, {
-        animation: 150, // ms, animation speed moving items when sorting, `0` — without animation
+        animation: 100, // ms, animation speed moving items when sorting, `0` — without animation
         handle: ".handle", // Restricts sort start click/touch to the specified element
         onEnd: function (evt) {
-          reIndex(null, evt.oldIndex, evt.newIndex);
+          reIndex(urlList, null, evt.oldIndex, evt.newIndex);
         }
       });
       itemsInfo.textContent = "Queue in this window";

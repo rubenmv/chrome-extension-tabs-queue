@@ -46,7 +46,7 @@ body {
 h1 {
   display: inline-block;
   vertical-align: middle;
-  font-size: 1.6em;
+  font-size: 1.5em;
   text-transform: uppercase;
   font-weight: 700;
   margin-right: 2em;
@@ -54,9 +54,10 @@ h1 {
 h1:before {
   content: "";
   display: inline-block;
-  background: url("images/default-32.png") no-repeat;
+  vertical-align: middle;
+  background: url("images/default-32_cut.png") no-repeat;
   width: 32px;
-  height: 28px;
+  height: 24px;
   margin-right: 5px;
 }
 h2 {
@@ -68,16 +69,44 @@ ol, ul {
   /*list-style-position: inside;*/
   text-align: left;
 }
-li {
-  font-size: 0.8em;
-  max-height: 3em;
+.list-level1 {
+  border: 2px dashed #ddd;
+  border-radius: 5px;
+  margin-top: 0.5em;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+/*Specific limits for lists. Saved queues is smaller.*/
+#savedQueuesList {
+  max-height: 160px;
+}
+#url-list {
+  max-height: 240px;
+}
+/* For items inside saved queue */
+.sublist {
+  display: none;
+}
+.list-level1 > li {
+  font-size: 0.9em;
+  /*max-height: 3em;*/
   /*border: 1px solid #E0E0E0;*/
-  padding: 0.3em;
+  padding: 0.2em;
   line-height: 2em;
   cursor: pointer;
 }
-li:hover {
+.list-level1 li:hover {
   background-color: #FDFEDE;
+}
+/* SUBLIST */
+.list-level1 ol {
+  font-size: 0.9em;
+  padding-left: 2em;
+}
+.list-level1 ol li {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 a {
   color: inherit;
@@ -96,22 +125,15 @@ a {
 .section {
   padding: 0.4em;
   margin: 0.5em 0;
-  
 }
-ol {
-  border: 2px dashed #ddd;
-  border-radius: 5px;
-  margin-top: 0.5em;
-  overflow-x: hidden;
-  overflow-y: scroll;
+.clickable {
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
 }
-/*Specific limits for lists. Saved queues is smaller.*/
-#savedQueuesList {
-  max-height: 160px;
+.clickable:hover {
+  text-shadow: 0 0 5px #bbbbbb;
 }
-#url-list {
-  max-height: 240px;
-}
+
 .list-item-btn {
   display: none;
   padding: 0.3em 0.7em;
@@ -139,7 +161,7 @@ ol {
   cursor: -webkit-grabbing;
 }
 .item-lock {
-  width:16px; 
+  width:16px;
   height:16px;
   vertical-align: middle;
   margin-right: 0.5em;
