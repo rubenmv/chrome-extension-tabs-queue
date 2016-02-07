@@ -4,6 +4,7 @@ var gulp = require('gulp');
 var uglify = require('gulp-uglify');
 var minifyCSS = require('gulp-minify-css');
 var minifyHTML = require('gulp-minify-html');
+var copy = require('gulp-copy');
 // Minify JS
 gulp.task('uglify', function () {
     return gulp.src('src/*.js')
@@ -22,5 +23,10 @@ gulp.task('minify-html', function () {
         .pipe(minifyHTML())
         .pipe(gulp.dest('release'))
 });
+// Copy README
+gulp.task('copy', function () {
+    return gulp.src('README.md')
+        .pipe(copy('release'))
+});
 // Default Task
-gulp.task('default', ['uglify', 'minify-css', 'minify-html']);
+gulp.task('default', ['uglify', 'minify-css', 'minify-html', 'copy']);

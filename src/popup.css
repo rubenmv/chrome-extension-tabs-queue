@@ -71,7 +71,6 @@ ol, ul {
 }
 .list-level1 {
   border: 2px dashed #ddd;
-  border-radius: 5px;
   margin-top: 0.5em;
   overflow-x: hidden;
   overflow-y: scroll;
@@ -92,7 +91,17 @@ ol, ul {
   /*max-height: 3em;*/
   /*border: 1px solid #E0E0E0;*/
   padding: 0.2em;
+  padding-left: 0.5em;
   line-height: 2em;
+  cursor: pointer;
+}
+.list-item-title {
+  display: inline-block;
+  width: 80%;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
 }
 .list-level1 li:hover {
@@ -143,15 +152,7 @@ a {
   color: #fff;
   background-color: #000;
 }
-.item-url {
-  display: inline-block;
-  width: 82%;
-  vertical-align: middle;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: pointer;
-}
+
 .handle {
   font-size: 1.5em;
   vertical-align: middle;

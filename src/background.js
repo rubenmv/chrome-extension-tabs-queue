@@ -292,13 +292,13 @@ function removeItem(queueId, index) {
 function formatDateTime(dt) {
   var datetime = new Date(dt);
   try {
-    var month = datetime.getMonth() + 1;
-    if(month < 10) {
-      month = "0" + month;
-    }
-    var date = datetime.getFullYear() + "-" + month + "-" + datetime.getDate();
-    var time = datetime.getHours() + ":" + datetime.getMinutes() + ":" + datetime.getSeconds();
-    dt = date + " " + time;
+    // magic!! slice(-2) starts counting from the end, so it leaves only the last two digits. Ex: Month = 9 -> 09 -> 09 :: Month = 11 -> 011 -> 11
+    dt =  datetime.getFullYear() + '-' +
+          ('0' + (datetime.getMonth() + 1)).slice(-2) + "-" +
+          ('0' + datetime.getDate()).slice(-2) + " " +
+          ('0' + datetime.getHours()).slice(-2) + ":" +
+          ('0' + datetime.getMinutes()).slice(-2) + ":" +
+          ('0' + datetime.getSeconds()).slice(-2);
   }
   catch (err) {
     dt = "queue";
@@ -685,7 +685,7 @@ function onCreatedTab(newTab) {
   if (!isActive) {
     return;
   }
-  // If the tab is overriding the limit, don"t
+  // If the tab is overriding the limit, don't
   // push it into the waiting list
   if (!isOverriding) {
     tabsWaiting.push(newTab);

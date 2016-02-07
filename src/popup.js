@@ -206,7 +206,7 @@ function createItem(index, url, locked) {
   lock.addEventListener("click", toggleLock);
   // Url
   var urlSpan = document.createElement("span");
-  urlSpan.setAttribute("class", "item-url");
+  urlSpan.setAttribute("class", "item-url list-item-title");
   //urlSpan.setAttribute("href", url);
   urlSpan.textContent = url;
   // Remove button
@@ -250,7 +250,7 @@ function loadSavedQueues() {
       var title = document.createElement("span");
       //title.textContent = "Queue " + savedCount + " :: " + qus[i].items.length + " items";
       title.textContent = qus[i].name + " :: " + qus[i].items.length + " items";
-      title.setAttribute("class", "left");
+      title.setAttribute("class", "list-item-title");
       title.setAttribute("data-type", "list-item-title");
       var restore = document.createElement("span");
       restore.setAttribute("class", "list-item-btn");
@@ -325,7 +325,6 @@ function getBackgroundInfo() {
         animation: 100, // ms, animation speed moving items when sorting, `0` — without animation
         handle: ".handle", // Restricts sort start click/touch to the specified element
         onEnd: function (evt) {
-          console.log(urlList);
           reIndex(null, evt.oldIndex, evt.newIndex);
         }
       });
