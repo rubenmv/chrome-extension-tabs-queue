@@ -9,7 +9,8 @@ By default tabs with URL matching Chrome internal pages won't be counted in the 
 IMPORTANT: This extension is not meant to be used as some kind of "read later" or session manager. It's a simple tab limiter with some extra functionality.
 
 ![Button and popup screenshot](screenshots/tabs-queue-2_0-screenshot-1.jpg)
-![Settings screenshot](screenshots/tabs-queue-2_0-screenshot-2.png)
+![Settings screenshot](screenshots/tabs-queue-2_0-screenshot-2.jpg)
+![Settings screenshot](screenshots/tabs-queue-2_0-screenshot-3.jpg)
 
 Enjoy.
 
