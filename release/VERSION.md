@@ -4,14 +4,16 @@ Full changelog here: https://raw.githubusercontent.com/rubenmv/chrome-extension-
 
 ## [2.0.0] 2016-01-26
 - Multi-window queues. When a window in closed, the queue (if not empty) is saved.
-- Improved popup: List saved queues. Add/delete/restore/sort saved queues and items.
-- Lock items in current queue.
-- "Queue to fit limit" button in popup with two modes.
-- Context menu option to override queue limit.
-- On/off button.
-- Automatic queue migration from version 1.0.
+- List of saved queues and preview it's content.
+- Delete/restore saved queues and items.
+- Drag and drop active queue items to rearrange.
+- Lock items in active queue.
+- Click on title to "Queue to fit limit". Two modes: queue tabs on the right or by recent. 
+- Context menu option to open links new tab (override queue limit).
+- On/off button to enable/disable extension functionality.
 - Slow network mode: adds a new limit for loading tabs.
 - Inverse mode: New items will be added to the top of the queue.
+- Automatic queue migration from version 1.0.
 
 ## [1.0.0] 2014-09-10
 - Add items to queue depending on limit.

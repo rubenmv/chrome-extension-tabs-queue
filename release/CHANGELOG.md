@@ -1,10 +1,15 @@
-# Change Log
+# Change log
 All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
 
 ## [2.0.0] 2016-01-25
 - Added inverse mode option. New items will be added to the top of the queue.
 - Added slow network mode. Sets a new limit for loading tabs.
 - Added queue migration from version 1.0.
+- "Queue to fit limit" button removed. Now works with a click on title.
+- Improved looks, less wasted space in popup.
+- Merge button in saved queues.
+- Preview items in saved queues.
+- Date and time for saved queues names.
 
 ## [1.1.4] 2015-11-20
 - "Queue to fit limit" button to queue tabs that exceed the current limit.
