@@ -3,7 +3,7 @@
 
   "name": "Tabs limiter with queue",
   "short_name": "Tabs Queue",
-  "description": "Opened tabs limiter with queue.",
+  "description": "Tabs limiter with queue.",
   "version": "2.0",
 
   "permissions": [
