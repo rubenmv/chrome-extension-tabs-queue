@@ -1,6 +1,9 @@
 # Change log
 All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
 
+### [2.0.1] 2016-02-26
+- Removed feedback form. Mandrill service is no longer free. 
+
 ## [2.0.0] 2016-01-25
 - Added inverse mode option. New items will be added to the top of the queue.
 - Added slow network mode. Sets a new limit for loading tabs.

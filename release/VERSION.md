@@ -2,6 +2,9 @@
 Short changelog for the main public version. The dates correspond with the dates of release in Chrome Store.
 Full changelog here: https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/CHANGELOG.md
 
+## [2.0.1] 2016-02-26
+- Removed feedback form. Mandrill service is no longer free. 
+
 ## [2.0.0] 2016-01-26
 - Multi-window queues. When a window in closed, the queue (if not empty) is saved.
 - List of saved queues and preview it's content.
