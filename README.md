@@ -16,6 +16,9 @@ Enjoy.
 
 ##CURRENT VERSION##
 
+### [2.0.2] 2016-02-26
+- Minor changes, removed unnecessary stuff. Removed minified.js and email-utils.
+
 ### [2.0.1] 2016-02-26
 - Removed feedback form. Mandrill service is no longer free. 
 

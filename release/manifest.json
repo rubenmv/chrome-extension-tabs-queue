@@ -4,7 +4,7 @@
   "name": "Tabs limiter with queue",
   "short_name": "Tabs Queue",
   "description": "Tabs limiter with queue.",
-  "version": "2.0.1",
+  "version": "2.0.2",
 
   "permissions": [
     "tabs",

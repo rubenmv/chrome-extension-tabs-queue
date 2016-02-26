@@ -1,6 +1,9 @@
 # Change log
 All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
 
+### [2.0.2] 2016-02-26
+- Minor changes, removed unnecessary stuff. Removed minified.js and email-utils.
+
 ### [2.0.1] 2016-02-26
 - Removed feedback form. Mandrill service is no longer free. 
 

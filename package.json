@@ -1,6 +1,6 @@
 {
   "name": "chrome-extension-tabs-queue",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-copy": "0.0.2",
