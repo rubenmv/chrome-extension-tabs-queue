@@ -16,6 +16,9 @@ Enjoy.
 
 ##CURRENT VERSION##
 
+### [2.0.3] 2016-03-18
+- BUGFIX: remove "removeEventListener" for DOMLoaded to solve incorrect use of parameters. No difference in performance.
+
 ### [2.0.2] 2016-02-26
 - Minor changes, removed unnecessary stuff. Removed minified.js and email-utils.
 

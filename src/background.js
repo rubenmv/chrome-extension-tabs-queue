@@ -359,7 +359,6 @@ function updateBadgeCounter() {
  * Initialize settings and load queues
  */
 function init() {
-  document.removeEventListener("DOMContentLoaded");
   //sync.get callback, data received
   function optionsDataRetrieved(data) {
     // Check for error
