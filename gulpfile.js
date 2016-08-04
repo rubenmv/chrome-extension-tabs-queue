@@ -2,7 +2,7 @@
 var gulp = require('gulp');
 // Include plugins
 var uglify = require('gulp-uglify');
-var minifyCSS = require('gulp-minify-css');
+var minifyCSS = require('gulp-clean-css');
 var minifyHTML = require('gulp-minify-html');
 var copy = require('gulp-copy');
 // Minify JS

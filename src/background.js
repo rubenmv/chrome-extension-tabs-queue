@@ -704,6 +704,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
     windowId: tabState.windowId
   }, function (windowTabs) {
     // Get number of opened tabs, whitelisted and pinned excluded
+    var freeSpace = calculateFreespace(windowTabs);
     var tabCount = 0;
     for (var i = 0; i < windowTabs.length; i++) {
       if (!isInWhitelist(windowTabs[i].url) && !windowTabs[i].pinned) {
@@ -712,7 +713,7 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
     }
     // If no limit exceeded, do nothing
     // else add to urlQueue
-    if (tabCount <= tabLimit) {
+    if (freeSpace > 0) {
       return;
     } else {
       // Queue new tab url and close it
