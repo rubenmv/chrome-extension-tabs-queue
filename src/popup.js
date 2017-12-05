@@ -74,7 +74,8 @@ function onQueueListClick(evt) {
       newTab = true;
     }
     // openUrlInTab(windowId, url, position, override, replaceCurrent)
-    bgPage.openUrlInTab(queueId, evt.target.textContent, -1, newTab, !newTab);
+    console.log(evt.target.getAttribute("data-url"));
+    bgPage.openUrlInTab(queueId, evt.target.getAttribute("data-url"), -1, newTab, !newTab);
   
     // Remove element from queue and storage, only if not locked
     // value (int) was added on getBackgroundInfo() when creating li elements
@@ -190,7 +191,7 @@ function toggleLock(evt) {
 /**
  * Creates new queue item
  */
-function createItem(index, url, locked) {
+function createItem(index, url, title, locked) {
   // List element
   var li = document.createElement("li");
   li.setAttribute("class", "list-item");
@@ -208,7 +209,12 @@ function createItem(index, url, locked) {
   var urlSpan = document.createElement("span");
   urlSpan.setAttribute("class", "item-url list-item-title");
   //urlSpan.setAttribute("href", url);
+  urlSpan.setAttribute("data-url", url);
   urlSpan.textContent = url;
+  if(title !== undefined && title.trim() !== "") {
+    urlSpan.textContent = itemList[j].title;
+  }
+  
   // Remove button
   var remove = document.createElement("span");
   remove.setAttribute("class", "list-item-btn");
@@ -288,7 +294,11 @@ function loadSavedQueues() {
       var itemList = qus[i].items;
       for (var j = 0; j < itemList.length; j++) {
         var liItem = document.createElement("li");
-        liItem.textContent = itemList[j].url;
+        liItem.setAttribute("data-url", itemList[j].url);
+        //liItem.textContent = itemList[j].url;
+        if(itemList[j].title !== undefined && itemList[j].title.trim() !== "") {
+          liItem.textContent = itemList[j].title;
+        }
         olItems.appendChild(liItem);
       }
       liQueue.appendChild(olItems);
@@ -331,7 +341,7 @@ function getBackgroundInfo() {
       itemsInfo.textContent = "Queue in this window";
       for (var i = 0; i < urlArray.length; i++) { 
         // Append item to list
-        urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].locked));
+        urlList.appendChild(createItem(i, urlArray[i].url, urlArray[i].title, urlArray[i].locked));
       }
       urlList.addEventListener("click", onQueueListClick);
     }

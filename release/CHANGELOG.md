@@ -1,6 +1,11 @@
 # Change log
 All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
 
+### [2.0.4] 2017-12-05
+- Added context menu entries for sending links and tabs directly to the queue.
+- Added whitelist exceptions for "The Great Suspender" suspended tabs.
+- Fixes some problems with internal tab count.
+
 ### [2.0.3] 2016-03-18
 - BUGFIX: remove "removeEventListener" for DOMLoaded to solve incorrect use of parameters. No difference in performance.
 
