@@ -2,10 +2,10 @@
     "name": "chrome-extension-tabs-queue",
     "version": "2.0.4",
     "devDependencies": {
-        "gulp": "*",
-        "gulp-clean-css": "^3.9.0",
-        "gulp-copy": "^1.0.1",
+        "gulp": "^4.0.2",
+        "gulp-clean-css": "^4.2.0",
+        "gulp-copy": "^4.0.1",
         "gulp-minify-html": "*",
-        "gulp-uglify": "^3.0.0"
+        "gulp-uglify": "^3.0.2"
     }
 }
