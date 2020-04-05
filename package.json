@@ -1,11 +1,11 @@
 {
     "name": "chrome-extension-tabs-queue",
     "version": "2.0.4",
-    "devDependencies": {
-        "gulp": "^4.0.2",
-        "gulp-clean-css": "^4.2.0",
-        "gulp-copy": "^4.0.1",
-        "gulp-minify-html": "*",
-        "gulp-uglify": "^3.0.2"
-    }
+    "license": "GPL-3.0-or-later",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rubenmv/chrome-extension-tabs-queue.git"
+    },
+    "devDependencies": {},
+    "dependencies": {}
 }
