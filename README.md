@@ -14,44 +14,12 @@ IMPORTANT: This extension is not meant to be used as some kind of "read later" o
 
 Enjoy.
 
-##CURRENT VERSION##
-
-### [2.0.4] 2017-12-05
-- Added context menu entries for sending links and tabs directly to the queue.
-- Added whitelist exceptions for "The Great Suspender" suspended tabs.
-- Fixes some problems with internal tab count.
-
-### [2.0.3] 2016-03-18
-- BUGFIX: remove "removeEventListener" for DOMLoaded to solve incorrect use of parameters. No difference in performance.
-
-### [2.0.2] 2016-02-26
-- Minor changes, removed unnecessary stuff. Removed minified.js and email-utils.
-
-### [2.0.1] 2016-02-26
-- Removed feedback form. Mandrill service is no longer free. 
-
-### [2.0.0] 2016-01-26
-- Multi-window queues. When a window in closed, the queue (if not empty) is saved.
-- List of saved queues and preview it's content.
-- Delete/restore saved queues and items.
-- Drag and drop active queue items to rearrange.
-- Lock items in active queue.
-- Click on title to "Queue to fit limit". Two modes: queue tabs on the right or by recent. 
-- Context menu option to open links new tab (override queue limit).
-- On/off button to enable/disable extension functionality.
-- Slow network mode: adds a new limit for loading tabs.
-- Inverse mode: New items will be added to the top of the queue.
-- Automatic queue migration from version 1.0.
-
-[See full changelog.](https://raw.githubusercontent.com/rubenmv/chrome-extension-tabs-queue/master/release/CHANGELOG.md)
-
-
-##ABOUT PERMISSIONS##
+## ABOUT PERMISSIONS
 This extension makes use of the minimum required permissions to provide it's functionality. 
 
 The code is minifized to improve performance, but the original source code is public and visible from the [GitHub](https://github.com/rubenmv/chrome-extension-tabs-queue) repository, including the Gulp tasks used to obtain the final build. 
 
-##LEGAL STUFF##
+## LEGAL STUFF
 Tabs Queue by Rubén Martínez is licensed as [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt). You can find the source code on [GitHub](https://github.com/rubenmv/chrome-extension-tabs-queue).  
 This extension makes use of [Sortable.js](https://github.com/RubaXa/Sortable), which is distributed under the [MIT License](https://opensource.org/licenses/MIT).  
 Icon from [Picol](http://www.picol.org/) is licensed under [CC BY SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/).

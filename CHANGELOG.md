@@ -1,6 +1,9 @@
 # Change log
 All notable changes to this project will be documented in this file. This one shows every version released and not released to the public.
 
+### [2.0.5] 2021-05-28
+- More error catching
+
 ### [2.0.4] 2017-12-05
 - Added context menu entries for sending links and tabs directly to the queue.
 - Added whitelist exceptions for "The Great Suspender" suspended tabs.

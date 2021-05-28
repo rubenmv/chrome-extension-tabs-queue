@@ -1,5 +1,7 @@
 /*global chrome*/
 "use strict";
+var DEBUG_MODE = false;
+
 var DEFAULT_ID = -1,
     whitelist = [
         // The "suspended.html" part is an exception for "The Great Suspender" suspended tabs
@@ -30,6 +32,17 @@ var DEFAULT_ID = -1,
 // Regular expressions for url exclusions
 var ICON_DEFAULT = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAAqElEQVR4nO3aQQrCQBBE0Y54/yOrW5GABI0fmfeWs2iKYtLMIjMAAMCKtpm5nzDz2afzT513+XDY31NAHaB23Tl7/ebe+fYO+anlb4AC6gC1vXeAHbASBdQBanvvgKOO7ozSNjO354Plb4AC6gA1BdQBagqoA9QUUAeoKaAOUFNAHaCmgDpATQF1gJoC6gA1BdQBagqoA9TO+Eforyx/AxRQBwAAACg8AEejCFAaFqVwAAAAAElFTkSuQmCC";
 var ICON_DISABLED = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAABcVBMVEUAAAD/AAD///8AAAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAD/AAAAAAABAAADAAAGAAAKAAAPAAAVAAAcAAAiAAAjAAApAAAtAAA3AABCAABHAABQAABZAABjAABpAAB4AAB6AACHAACQAACbAACkAACxAAC9AAC/AADCAADIAADPAADXAADbAADjAADqAADuAADxAAD1AAD5AAD8AAD+AAD/AAB4L4E0AAAAUXRSTlMAAAABAQMFBgcJCgsMDQ8VFhweICUnKi0uNDY3QkNGTlJUVVhgYmVnaXh5iIuMj52foKGio66wsba5vb7CyMnKzM7W2drb4+bq6/Dz9ff5/P5esCL3AAABx0lEQVR42u3XR1MCQRCGYXoFs6yKGRRzzjlnESOOOeecxTy/Xl3Lni1Bl25ult9xtt7n1oe1aVHuHwgDgMVKm2OjArwB2ZkUBeCZkVL262wgd1J+bMTFBDL88nPjOSwgzSe/1ssB9GHsx1IVIMIM3hfyltKHfXBdGLO9L2Igrhv7h01BBxbasH/aEnRg/hT75x0RAthMCw8cY/+yJxjAocQdCAaw/4r9kWAAuy/YnwhrIGTbz9ifzYd8tQa2HrE/XxB0YOMe+8slQQdWg9jfLItIgG8HNKoOSDdebGox1oBzAHufC+hAvDqgiWygA44O7KfdQAfsjdjP5gMDqMU+UAwMoAr7uUpgABVzCFQBAygKYF8HDMAzi32TnQG4p7HvcAAdyPZj350AdCDdh/2gE+iAPmY+IDrgHFIHlAZ0ILEHe38W0AHTAU25gQ7YW9UBeYAB1KsDKgQGUK0OqBwYQKU0HRADKFEHVAMMoEAdUIOdAZgOqN0BJMDY5gP2F4si4iGwFsT+elnQgZU77G9XBAO4wj64KmiAZixn/OuAMuH3/fS/4Box+sk8YAKaPmAckMYGtOQuGfBqDAAX11KmWQP//41/EngDrVcKealcgDwAAAAASUVORK5CYII=";
+
+function clog(text) {
+    if (DEBUG_MODE == true)
+        console.log(text);
+}
+
+function cerror(text) {
+    if (DEBUG_MODE == true)
+        console.error(text);
+}
+
 /*********************************************
  * CLASSES
  */
@@ -45,8 +58,8 @@ function Queue(windowId) {
 /**
  * Item. Contains info about the tab saved in queue.
  */
-function Item(id,  windowId, url, title, state, locked) {
-        this.id = id,
+function Item(id, windowId, url, title, state, locked) {
+    this.id = id,
         this.window = windowId, // original window/queue where it was created
         this.url = url,
         this.title,
@@ -69,7 +82,7 @@ function setLock(queueId, index, value) {
 /**
  * Extend Array object to include move method
  */
-Array.prototype.move = function (oldIndex, newIndex) {
+Array.prototype.move = function(oldIndex, newIndex) {
     while (oldIndex < 0) {
         oldIndex += this.length;
     }
@@ -166,8 +179,7 @@ function clearSavedQueues() {
     while (i < queues.length) {
         if (queues[i].window === DEFAULT_ID) {
             queues.splice(i, 1);
-        }
-        else {
+        } else {
             i++;
         }
     }
@@ -186,17 +198,15 @@ function clearItems(queueId) {
  */
 function queueTab(tabState) {
     if (!isInWhitelist(tabState.url)) {
-        console.log("Queue tab: " +  tabState.title);
+        clog("Queue tab: " + tabState.title);
         // Create item
         var item = new Item(tabState.id, tabState.windowId, tabState.url, tabState.title, tabState.status, false);
         // Save to queue and local storage
         saveItem(item);
         isQueuing = true;
-        chrome.tabs.remove(tabState.id, function () {
+        chrome.tabs.remove(tabState.id, function() {
             if (chrome.runtime.lastError !== undefined) {
-                //console.error("An error ocurred removing tab: " + chrome.runtime.lastError.string);
-                //console.error(chrome.runtime.lastError);
-                return;
+                cerror(`An error ocurred in ${queueTab.name}: ${chrome.runtime.lastError.string}`);
             }
         });
     }
@@ -213,27 +223,30 @@ function compareById(a, b) {
  * Queue tabs on the right to fit limit
  */
 function queueToLimit(windowId) {
-    chrome.tabs.query(
-        {
-            "windowId": windowId,
-            "pinned": false
-        }, function (tabs) {
-            // Discard tabs from whitelist
-            for (var i = 0; i < tabs.length; i++) {
-                if (isInWhitelist(tabs[i].url)) {
-                    tabs.splice(i, 1);
-                    i--;
-                }
+    chrome.tabs.query({
+        "windowId": windowId,
+        "pinned": false
+    }, function(tabs) {
+        if (chrome.runtime.lastError !== undefined) {
+            cerror(`An error ocurred in ${queueToLimit.name}: ${chrome.runtime.lastError.string}`);
+        }
+
+        // Discard tabs from whitelist
+        for (var i = 0; i < tabs.length; i++) {
+            if (isInWhitelist(tabs[i].url)) {
+                tabs.splice(i, 1);
+                i--;
             }
-            if (tabs.length > tabLimit) {
-                if (queueByRecent) {
-                    tabs = tabs.sort(compareById);
-                }
-                for (var i = tabLimit; i < tabs.length; i++) {
-                    queueTab(tabs[i]);
-                }
+        }
+        if (tabs.length > tabLimit) {
+            if (queueByRecent) {
+                tabs = tabs.sort(compareById);
             }
-        });
+            for (var i = tabLimit; i < tabs.length; i++) {
+                queueTab(tabs[i]);
+            }
+        }
+    });
 }
 /**
  * Push new url to queue and save it in local storage
@@ -251,8 +264,7 @@ function saveItem(item) {
     // Push to queue
     if (lifo) {
         qu.unshift(item);
-    }
-    else {
+    } else {
         qu.push(item);
     }
     // Update local storage and badge
@@ -263,10 +275,16 @@ function saveItem(item) {
  * Removes item from queue and storage
  */
 function removeItem(queueId, index) {
-    var itemQueue = getQueue(queueId).items;
-    // Remove from queue
-    itemQueue.splice(index, 1);
-    cleanAndStore();
+    clog("removeItem. queueId: " + queueId + ", index: " + index);
+    try {
+        var itemQueue = getQueue(queueId).items;
+        // Remove from queue
+        itemQueue.splice(index, 1);
+        cleanAndStore();
+    } catch (error) {
+        cerror("Error al eliminar item de la lista. queueId: " + queueId + ", index: " + index);
+    }
+
 }
 /***********************************************************
  * GENERAL
@@ -280,10 +298,9 @@ function formatDateTime(dt) {
     try {
         // magic!! slice(-2) starts counting from the end, so it leaves only the last two digits. Ex: Month = 9 -> 09 -> 09 :: Month = 11 -> 011 -> 11
         dt = datetime.getFullYear() + '-' + ('0' + (datetime.getMonth() + 1)).slice(-2) + "-" + ('0' + datetime.getDate()).slice(-2) + " " + ('0' + datetime.getHours()).slice(-2) + ":" + ('0' + datetime.getMinutes()).slice(-2) + ":" + ('0' + datetime.getSeconds()).slice(-2);
-    }
-    catch (err) {
+    } catch (err) {
         dt = "queue";
-        console.error(err);
+        cerror(err);
     }
     return dt;
 }
@@ -293,53 +310,52 @@ function formatDateTime(dt) {
 function setActive(active) {
     isActive = active;
     // Save to storage
-    chrome.storage.local.set(
-        {
-            "isActive": isActive
-        });
+    chrome.storage.local.set({
+        "isActive": isActive
+    });
     // Change icon
     var icon = isActive ? ICON_DEFAULT : ICON_DISABLED;
     // Active/deactive update interval
     if (isActive) {
         setUpdater();
-    }
-    else {
+    } else {
         window.clearInterval(updater);
     }
-    chrome.browserAction.setIcon(
-        {
-            path: icon
-        });
+    chrome.browserAction.setIcon({
+        path: icon
+    });
 }
 /**
  * Updates counter in browser action icon/button
  */
 function updateBadgeCounter() {
-    chrome.tabs.query(
-        {
-            currentWindow: true,
-            active: true
-        }, function (tabs) {
-            var currentTab = tabs[0];
-            // Other window types like popup or app
-            if (!currentTab) {
-                return;
-            }
-            var badgeColor = "#00ff00";
-            var currentQueue = getQueue(currentTab.windowId).items;
-            if (currentQueue.length > 0) {
-                badgeColor = "#ff0000";
-            }
-            chrome.browserAction.setBadgeBackgroundColor(
-                {
-                    "color": badgeColor,
-                });
-            chrome.browserAction.setBadgeText(
-                {
-                    "text": currentQueue.length.toString(),
-                    "tabId": currentTab.id
-                });
+    chrome.tabs.query({
+        currentWindow: true,
+        active: true
+    }, function(tabs) {
+        if (chrome.runtime.lastError !== undefined) {
+            cerror(`An error ocurred in ${updateBadgeCounter.name}: ${chrome.runtime.lastError.string}`);
+            return;
+        }
+
+        var currentTab = tabs[0];
+        // Other window types like popup or app
+        if (!currentTab) {
+            return;
+        }
+        var badgeColor = "#00ff00";
+        var currentQueue = getQueue(currentTab.windowId).items;
+        if (currentQueue.length > 0) {
+            badgeColor = "#ff0000";
+        }
+        chrome.browserAction.setBadgeBackgroundColor({
+            "color": badgeColor,
         });
+        chrome.browserAction.setBadgeText({
+            "text": currentQueue.length.toString(),
+            "tabId": currentTab.id
+        });
+    });
 }
 /**
  * Initialize settings and load queues
@@ -349,7 +365,7 @@ function init() {
     function optionsDataRetrieved(data) {
         // Check for error
         if (chrome.runtime.lastError !== undefined) {
-            console.error("An error ocurred initializing options: " + chrome.runtime.lastError.string);
+            cerror("An error ocurred initializing options: " + chrome.runtime.lastError.string);
             return;
         }
         // Initialize properties
@@ -375,10 +391,9 @@ function init() {
             isActive = data.isActive;
         }
         var iconPath = isActive ? ICON_DEFAULT : ICON_DISABLED;
-        chrome.browserAction.setIcon(
-            {
-                "path": iconPath
-            });
+        chrome.browserAction.setIcon({
+            "path": iconPath
+        });
         if (data.hasOwnProperty("queues")) {
             queues = JSON.parse(data.queues);
         }
@@ -416,23 +431,22 @@ function initQueues() {
  * Check tabs every x seconds and update badge counter
  */
 function setUpdater() {
-    updater = window.setInterval(function () {
+    updater = window.setInterval(function() {
         if (!isActive) {
             return;
         }
         // Get all windows info
-        chrome.windows.getAll(
-            {
-                "populate": true
-            }, function (windows) {
-                for (var i = 0; i < windows.length; i++) {
-                    if (windows[i].type === "normal" && !checkingItems) {
-                        checkingItems = true;
-                        checkOpenNextItems(windows[i]);
-                        checkingItems = false;
-                    }
+        chrome.windows.getAll({
+            "populate": true
+        }, function(windows) {
+            for (var i = 0; i < windows.length; i++) {
+                if (windows[i].type === "normal" && !checkingItems) {
+                    checkingItems = true;
+                    checkOpenNextItems(windows[i]);
+                    checkingItems = false;
                 }
-            });
+            }
+        });
         updateBadgeCounter();
     }, 500);
 }
@@ -482,20 +496,23 @@ function checkOpenNextItems(wdw) {
         // First create the tabs, then remove the items from queue
         // after ALL new tabs have been created
         var j = 0;
-        console.log("freeSpace: " + freeSpace);
+        clog("freeSpace: " + freeSpace);
         while (freeSpace > 0 && j < currentQueue.length) {
             if (!currentQueue[j].locked) {
-                console.log("create: " + currentQueue[j].url);
-                chrome.tabs.create(
-                    {
-                        "windowId": wdw.id,
-                        "url": currentQueue[j].url,
-                        "active": false
-                    });
+                clog("create: " + currentQueue[j].url);
+                chrome.tabs.create({
+                    "windowId": wdw.id,
+                    "url": currentQueue[j].url,
+                    "active": false
+                }, function() {
+                    if (chrome.runtime.lastError !== undefined) {
+                        cerror(`An error ocurred in ${updateBadgeCounter.name}: ${chrome.runtime.lastError.string}`);
+                        return;
+                    }
+                });
                 removeItem(wdw.id, j);
                 freeSpace--;
-            }
-            else {
+            } else {
                 j++;
             }
         }
@@ -510,29 +527,37 @@ function openUrlInTab(windowId, url, position, override, replaceCurrent) {
     isOverriding = override;
     // If loads in current, no need to override limit
     if (replaceCurrent) {
-        chrome.tabs.update(
-            {
-                "url": url
-            });
+        chrome.tabs.update({
+            "url": url
+        }, function() {
+            if (chrome.runtime.lastError !== undefined) {
+                cerror(`An error ocurred in ${openUrlInTab.name}: ${chrome.runtime.lastError.string}`);
+            }
+        });
     }
     // Create new tab
     else {
         if (position > -1) {
-            chrome.tabs.create(
-                {
-                    "windowId": windowId,
-                    "url": url,
-                    "index": position,
-                    "active": false
-                });
-        }
-        else {
-            chrome.tabs.create(
-                {
-                    "windowId": windowId,
-                    "url": url,
-                    "active": false
-                });
+            chrome.tabs.create({
+                "windowId": windowId,
+                "url": url,
+                "index": position,
+                "active": false
+            }, function() {
+                if (chrome.runtime.lastError !== undefined) {
+                    cerror(`An error ocurred in ${openUrlInTab.name}: ${chrome.runtime.lastError.string}`);
+                }
+            });
+        } else {
+            chrome.tabs.create({
+                "windowId": windowId,
+                "url": url,
+                "active": false
+            }, function() {
+                if (chrome.runtime.lastError !== undefined) {
+                    cerror(`An error ocurred in ${openUrlInTab.name}: ${chrome.runtime.lastError.string}`);
+                }
+            });
         }
     }
 }
@@ -540,17 +565,16 @@ function openUrlInTab(windowId, url, position, override, replaceCurrent) {
  * Open new window with associated queue
  */
 function openQueueInWindow(queue) {
-    chrome.windows.create(
-        {
-            "focused": false
-        }, function (windowInfo) {
-            // Update queue and items with the new window id
-            queue.window = windowInfo.id;
-            var items = queue.items;
-            for (var j = 0; j < items.length; j++) {
-                items[j].window = windowInfo.id;
-            }
-        });
+    chrome.windows.create({
+        "focused": false
+    }, function(windowInfo) {
+        // Update queue and items with the new window id
+        queue.window = windowInfo.id;
+        var items = queue.items;
+        for (var j = 0; j < items.length; j++) {
+            items[j].window = windowInfo.id;
+        }
+    });
 }
 /**
  * Restores a queue given an index in the list
@@ -601,28 +625,21 @@ function onSettingsChanged(changes, namespace) {
             newValue = storageChange.newValue;
             if (key === "tabLimit") {
                 tabLimit = newValue;
-            }
-            else if (key === "lifo") {
+            } else if (key === "lifo") {
                 lifo = newValue;
-            }
-            else if (key === "allowDuplicates") {
+            } else if (key === "allowDuplicates") {
                 allowDuplicates = newValue;
-            }
-            else if (key === "queueByRecent") {
+            } else if (key === "queueByRecent") {
                 queueByRecent = newValue;
-            }
-            else if (key === "hideContextMenu") {
+            } else if (key === "hideContextMenu") {
                 if (newValue) {
                     chrome.contextMenus.removeAll();
-                }
-                else {
+                } else {
                     createContextMenu();
                 }
-            }
-            else if (key === "slowNetworkMode") {
+            } else if (key === "slowNetworkMode") {
                 slowNetworkMode = newValue;
-            }
-            else if (key === "slowNetworkLimit") {
+            } else if (key === "slowNetworkLimit") {
                 slowNetworkLimit = newValue;
             }
         }
@@ -634,29 +651,26 @@ function onSettingsChanged(changes, namespace) {
 function cleanAndStore() {
     if (!storing) {
         storing = true;
-        var timer = window.setTimeout(function () {
+        var timer = window.setTimeout(function() {
             // cleanup
             var i = 0;
             while (i < queues.length) {
                 // Remove empty queues
                 if (queues[i].items.length === 0) {
                     queues.splice(i, 1);
-                }
-                else {
+                } else {
                     i++;
                 }
             }
             // storage works only with strings
             var jsonQueues = JSON.stringify(queues);
-            chrome.storage.local.set(
-                {
-                    "queues": jsonQueues
-                }, function () {
-                    if (chrome.runtime.lastError !== undefined) {
-                        console.error("An error ocurred saving queues: " + chrome.runtime.lastError.string);
-                        console.error(chrome.runtime.lastError);
-                    }
-                });
+            chrome.storage.local.set({
+                "queues": jsonQueues
+            }, function() {
+                if (chrome.runtime.lastError !== undefined) {
+                    cerror("An error ocurred saving queues: " + chrome.runtime.lastError.string);
+                }
+            });
             window.clearTimeout(timer);
             storing = false;
         }, 2000);
@@ -666,27 +680,24 @@ function cleanAndStore() {
  * CONTEXT MENU
  */
 function createContextMenu() {
-    chrome.contextMenus.create(
-        {
-            "id": "context_no_queue",
-            "title": "Open link in new tab (don't queue)",
-            "contexts": ["link"],
-            "onclick": onContextMenuLinkClicked
-        });
-    chrome.contextMenus.create(
-        {
-            "id": "context_queue",
-            "title": "Send link to queue",
-            "contexts": ["link"],
-            "onclick": onContextMenuLinkClicked
-        });
-    chrome.contextMenus.create(
-        {
-            "id": "context_tab_queue",
-            "title": "Send current tab to queue",
-            "contexts": ["all"],
-            "onclick": onContextMenuLinkClicked
-        });
+    chrome.contextMenus.create({
+        "id": "context_no_queue",
+        "title": "Open link in new tab (don't queue)",
+        "contexts": ["link"],
+        "onclick": onContextMenuLinkClicked
+    });
+    chrome.contextMenus.create({
+        "id": "context_queue",
+        "title": "Send link to queue",
+        "contexts": ["link"],
+        "onclick": onContextMenuLinkClicked
+    });
+    chrome.contextMenus.create({
+        "id": "context_tab_queue",
+        "title": "Send current tab to queue",
+        "contexts": ["all"],
+        "onclick": onContextMenuLinkClicked
+    });
 }
 /********************************************
  * EVENTS
@@ -701,11 +712,10 @@ function onContextMenuLinkClicked(info, tab) {
     }
     // Save url directly to queue
     else if (info.menuItemId === "context_queue") {
-        console.log("Saving Item");
+        clog("Saving Item");
         var item = new Item(DEFAULT_ID, tab.windowId, info.linkUrl, tab.title, "complete", false);
         saveItem(item);
-    }
-    else if (info.menuItemId === "context_tab_queue") {
+    } else if (info.menuItemId === "context_tab_queue") {
         queueTab(tab);
     }
 }
@@ -734,22 +744,24 @@ function onUpdatedTab(tabId, tabInfo, tabState) {
         return;
     }
     // Get tabs in updated tab window
-    chrome.tabs.query(
-        {
-            windowId: tabState.windowId
-        }, function (windowTabs) {
-            // Get number of opened tabs, whitelisted and pinned excluded
-            var freeSpace = calculateFreespace(windowTabs);
-            // If no limit exceeded, do nothing
-            // else add to urlQueue
-            if (freeSpace >= 0) {
-                return;
-            }
-            else {
-                // Queue new tab url and close it
-                queueTab(tabState);
-            }
-        });
+    chrome.tabs.query({
+        windowId: tabState.windowId
+    }, function(windowTabs) {
+        if (chrome.runtime.lastError !== undefined) {
+            cerror("An error ocurred onUpdatedTab: " + chrome.runtime.lastError.string);
+        }
+
+        // Get number of opened tabs, whitelisted and pinned excluded
+        var freeSpace = calculateFreespace(windowTabs);
+        // If no limit exceeded, do nothing
+        // else add to urlQueue
+        if (freeSpace >= 0) {
+            return;
+        } else {
+            // Queue new tab url and close it
+            queueTab(tabState);
+        }
+    });
 }
 /**
  * Check related queue and reset its id
@@ -785,10 +797,9 @@ function onInstalled() {
                 q.items.push(item);
             }
             // Cleanup old items in storage and save new queue
-            chrome.storage.local.remove(keys, function () {
+            chrome.storage.local.remove(keys, function() {
                 if (chrome.runtime.lastError !== undefined) {
-                    console.error("An error ocurred removing old storage keys: " + chrome.runtime.lastError.string);
-                    console.error(chrome.runtime.lastError);
+                    cerror("An error ocurred removing old storage keys: " + chrome.runtime.lastError.string);
                     return;
                 }
             });
